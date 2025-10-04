@@ -113,3 +113,11 @@ def api_order_detail(manage_no):
         return jsonify(_map_detail_row(data))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+# -------------------------------
+# 상세 페이지 라우트 (추가)
+# -------------------------------
+@order_bp.route('/detail/<manage_no>')
+def order_detail_page(manage_no):
+    return render_template('order/order_detail.html', manage_no=manage_no)
+

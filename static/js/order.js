@@ -37,7 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
           <td class="nowrap">${row.ship_date || ''}</td>
           <td class="nowrap">${row.remarks || ''}</td>
         `;
-        tr.addEventListener("click", () => showOrderDetail(row.manage_no));
+        //tr.addEventListener("click", () => showOrderDetail(row.manage_no));
+          // ✅ 상세 페이지로 이동
+        tr.addEventListener("click", () => {
+        window.location.href = `/order/detail/${row.manage_no}`;
+        });
         orderTableBody.appendChild(tr);
       });
       document.getElementById("tableInfo").textContent = `총 ${data.length}건`;
