@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>TEST_DATA 조회</title>
+    <style>
+        table { border-collapse: collapse; width: 90%; margin: 20px auto; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; cursor: pointer; }
+        #controls { width: 90%; margin: 0 auto; text-align: center; }
+        input[type="text"] { padding: 5px; width: 200px; }
+        button { padding: 5px 10px; margin: 0 5px; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center;">TEST_DATA 테이블 조회</h2>
+<!-- index.html 내부 어딘가에 -->
+<button onclick="location.href='/logout'">로그아웃</button>
+    <div id="controls">
+        이름 검색: <input type="text" id="searchName">
+        <button onclick="goSearch()">검색</button>
+        <button onclick="prevPage()">이전</button>
+        <button onclick="nextPage()">다음</button>
+        <span id="page-info"></span>
+    </div>
+
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th onclick="sortTable('ID')">ID</th>
+                <th onclick="sortTable('NAME')">NAME</th>
+                <th onclick="sortTable('VALUE')">VALUE</th>
+                <th onclick="sortTable('CREATED_AT')">CREATED_AT</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        let currentPage = 1;
+        const perPage = 15;
+        let sortCol = "VALUE";
+        let sortDir = "DESC";
+        let searchName = "";
+        let totalPages = 1;
+
+        async function fetchData() {
+            try {
+                const response = await fetch(`/data?page=${currentPage}&per_page=${perPage}&sort_col=${sortCol}&sort_dir=${sortDir}&name=${searchName}`);
+                const result = await response.json();
+                const data = result.data;
+                const totalCount = result.total_count;
+                totalPages = Math.ceil(totalCount / perPage);
+
+                const tbody = document.querySelector("#data-table tbody");
+                tbody.innerHTML = "";
+                data.forEach(row => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${row.id}</td>
+                        <td>${row.name}</td>
+                        <td>${row.value}</td>
+                        <td>${row.created_at}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById("page-info").textContent = `Page: ${currentPage} / ${totalPages} (총 ${totalCount}개)`;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) { currentPage--; fetchData(); }
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) { currentPage++; fetchData(); }
+        }
+
+        function sortTable(col) {
+            if (sortCol === col) sortDir = sortDir === "ASC" ? "DESC" : "ASC";
+            else { sortCol = col; sortDir = "ASC"; }
+            currentPage = 1;
+            fetchData();
+        }
+
+        function goSearch() {
+            searchName = document.getElementById("searchName").value.trim();
+            currentPage = 1;
+            fetchData();
+        }
+
+        fetchData(); // 페이지 로드 시 초기 데이터
+    </script>
+</body>
+</html>

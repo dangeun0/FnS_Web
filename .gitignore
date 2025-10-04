@@ -1,0 +1,24 @@
+# 이 줄은 주석입니다.
+
+# 1. 특정 파일 무시하기
+my_secret_password.txt
+ssh.key
+
+# 2. 특정 확장자를 가진 모든 파일 무시하기
+*.log
+*.bak
+*.tmp
+*.sql
+config
+*.txt
+*.code-workspace
+
+
+# 3. 특정 폴더 안의 모든 내용 무시하기
+/1004_backup/
+/Wallet_FnS/
+__pycache__/
+/db/
+
+# 4. 특정 이름의 폴더를 프로젝트 어디에서든 무시하기
+.vscode/

@@ -1,0 +1,25 @@
+<div id="detailModal">
+  <div id="detailCard">
+    <header>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div id="dTitle" style="font-weight:700">상세</div>
+        <button id="dClose">닫기</button>
+      </div>
+    </header>
+    <div id="detailBody">
+      <div class="grid" id="dGrid"></div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="text-align:left">일시</th>
+            <th style="text-align:left">구분</th>
+            <th style="text-align:right">수량</th>
+            <th style="text-align:left">비고</th>
+          </tr>
+        </thead>
+        <tbody id="dHist"></tbody>
+      </table>
+      {% include "partials/_form.html" %}
+    </div>
+  </div>
+</div>

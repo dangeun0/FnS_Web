@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>재고 목록</title>
+  <style>
+    :root{--bg:#f7f9fc;--card:#fff;--text:#223;--muted:#667;--pri:#2f6feb;--bd:#e3e7f0}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text)}
+    header{position:sticky; top:0; background:var(--bg); z-index:10; display:flex;gap:12px;align-items:center;justify-content:space-between;padding:16px 20px;}
+    .brand{font-weight:700}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 20px 24px}
+    .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.04);}
+    .toolbar{display:flex;gap:10px;align-items:center;padding:14px;border-bottom:1px solid var(--bd)}
+    input[type="search"],select{padding:10px 12px;border:1px solid var(--bd);border-radius:10px;min-width:220px}
+    button{padding:10px 12px;border:1px solid var(--bd);background:#fff;border-radius:10px;cursor:pointer}
+    button.primary{background:var(--pri);color:#fff;border-color:var(--pri)}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-top:1px solid var(--bd);padding:10px 10px;text-align:left;font-size:14px}
+    th{background:#fafbff;font-weight:600;position:sticky;top:0;z-index:1;cursor:pointer}
+    th.sortable:hover{background:#f1f4ff}
+    tr.clickable{cursor:pointer}
+    tr.clickable:hover{background:#fafcff}
+    .muted{color:var(--muted)}
+    .meta{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-top:1px solid var(--bd)}
+    .pager{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .pager .num{min-width:36px;padding:8px 10px;border:1px solid var(--bd);background:#fff;border-radius:8px;cursor:pointer}
+    .pager .num.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+    .pager .num[disabled]{opacity:.45;cursor:not-allowed}
+    .pager .ellipsis{padding:8px 6px;color:var(--muted)}
+    .menu{position:relative; z-index:20}
+    .menu button{white-space:nowrap}
+    .menu .panel{position:absolute; right:0; top:44px; min-width:180px; background:#fff; border:1px solid var(--bd); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.08); padding:10px; display:none; z-index:50}
+    .menu.open .panel{display:block}
+    .menu .panel label{display:flex; align-items:center; gap:8px; font-size:13px; padding:6px 4px; cursor:pointer}
+    .hide{display:none !important}
+    .spinner{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.6); backdrop-filter:saturate(1.2) blur(1.5px); z-index:9999; font-weight:600; color:#333}
+    .spinner.hidden{display:none}
+    /* modal */
+    #detailModal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.35);z-index:200}
+    #detailModal.open{display:flex}
+    #detailCard{width:min(820px,92vw);background:#fff;border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.2);overflow:hidden}
+    #detailCard header{position:relative;background:#fff;border-bottom:1px solid var(--bd);padding:12px 16px}
+    /* close button to the corner */
+    #dClose{position:absolute; top:8px; right:8px}
+    #detailBody{padding:12px 16px}
+    #detailBody .grid{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;margin-bottom:10px}
+    #dHist th,#dHist td{font-size:13px;padding:6px;border-top:1px solid var(--bd)}
+    /* IN/OUT pill styles */
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-weight:600;font-size:12px;line-height:1}
+    .pill.in{background:#eaf2ff;color:#1f5bd8}
+    .pill.out{background:#ffeceb;color:#d43b2e}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">재고 관리</div>
+    <div style="display:flex; gap:8px; align-items:center">
+      <div class="muted">/inventory API 연동</div>
+      <button id="btnLogout" title="로그아웃" style="margin-left:8px">로그아웃</button>
+    </div>
+  </header>
+  <div class="wrap">
+    <div class="card">
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="분류/제조사/부품명/규격/위치 검색…" />
+        <select id="perPage">
+          <option value="10">10개</option>
+          <option value="20" selected>20개</option>
+          <option value="50">50개</option>
+          <option value="100">100개</option>
+        </select>
+        <button class="primary" id="btnSearch">검색</button>
+        <div class="muted" id="status"></div>
+        <div class="menu" id="colMenuWrap">
+          <button id="btnCols">열 표시/숨김 ▾</button>
+          <div class="panel" id="colMenu"></div>
+        </div>
+      </div>
+      <div style="overflow:auto;max-height:70vh">
+        <table id="grid">
+          <thead>
+            <tr>
+              <th class="sortable col-CATEGORY_NAME" data-col="CATEGORY_NAME">분류</th>
+              <th class="sortable col-MAKER_NAME" data-col="MAKER_NAME">제조사</th>
+              <th class="sortable col-ITEM_NAME" data-col="ITEM_NAME">부품명</th>
+              <th class="sortable col-ITEM_SPEC" data-col="ITEM_SPEC">규격</th>
+              <th class="sortable col-STOCK" data-col="STOCK">현재고</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="meta">
+        <div id="pageInfo" class="muted">-</div>
+        <div class="pager" id="pager"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="spinner" class="spinner hidden">로딩 중…</div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal">
+    <div id="detailCard">
+      <header>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div id="dTitle" style="font-weight:700">상세</div>
+          <button id="dClose">닫기</button>
+        </div>
+      </header>
+      <div id="detailBody">
+        <div class="grid" id="dGrid"></div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th style="text-align:left">일시</th>
+              <th style="text-align:left">구분</th>
+              <th style="text-align:right">수량</th>
+              <th style="text-align:left">비고</th>
+            </tr>
+          </thead>
+          <tbody id="dHist"></tbody>
+        </table>
+        <!-- ✅ 신규 추가: 모달 내 입/출고 입력 영역 -->
+        <div style="margin-top:12px; padding:10px; border-top:1px solid #ddd; display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+          <select id="txnType">
+            <option value="IN">입고</option>
+            <option value="OUT">출고</option>
+          </select>
+          <input id="txnQty" type="number" min="1" placeholder="수량" style="width:100px" />
+          <input id="txnNote" type="text" placeholder="비고" style="flex:1; min-width:200px" />
+          <button id="txnConfirm" class="primary">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ===== State & Helpers =====
+let state = { page:1, per_page:20, sort_col:'STOCK', sort_dir:'DESC', q:'' };
+const $ = (s)=>document.querySelector(s);
+const tbody = document.querySelector('#grid tbody');
+const spinner = document.getElementById('spinner');
+
+const COLUMNS = [
+  { key:'CATEGORY_NAME', label:'분류' },
+  { key:'MAKER_NAME',    label:'제조사' },
+  { key:'ITEM_NAME',     label:'부품명' },
+  { key:'ITEM_SPEC',     label:'규격' },
+  { key:'STOCK',         label:'현재고' },
+];
+
+function showBusy(on){ spinner.classList.toggle('hidden', !on); }
+function qs(obj){ return new URLSearchParams(obj).toString(); }
+function readURL(){
+  const p = new URLSearchParams(location.search);
+  const n = (k, d)=>{ const v=p.get(k); return v===null? d: v; };
+  state.page = parseInt(n('page', state.page))||1;
+  state.per_page = parseInt(n('per_page', state.per_page))||20;
+  state.sort_col = (n('sort_col', state.sort_col) || 'STOCK').toUpperCase();
+  state.sort_dir = (n('sort_dir', state.sort_dir) || 'DESC').toUpperCase();
+  state.q = n('q', '');
+  $('#q').value = state.q; $('#perPage').value = String(state.per_page);
+}
+function writeURL(replace=true){
+  const url = location.pathname + '?' + qs({
+    page: state.page, per_page: state.per_page, sort_col: state.sort_col, sort_dir: state.sort_dir, q: state.q
+  });
+  if(replace) history.replaceState(null, '', url); else history.pushState(null, '', url);
+}
+
+function loadColPrefs(){ try{ return JSON.parse(localStorage.getItem('inv_cols')||'{}'); }catch(e){ return {}; } }
+function saveColPrefs(prefs){ localStorage.setItem('inv_cols', JSON.stringify(prefs)); }
+function applyVisibility(prefs){
+  COLUMNS.forEach(c=>{
+    const on = prefs[c.key] !== false; // default: visible
+    const th = document.querySelector(`th.col-${c.key}`);
+    if(th) th.classList.toggle('hide', !on);
+    document.querySelectorAll(`td.col-${c.key}`).forEach(td=> td.classList.toggle('hide', !on));
+  });
+}
+function buildColMenu(){
+  const wrap = document.getElementById('colMenu');
+  wrap.innerHTML='';
+  const prefs = loadColPrefs();
+  COLUMNS.forEach(c=>{
+    const on = prefs[c.key] !== false;
+    const id = 'col_'+c.key;
+    const row = document.createElement('label');
+    row.innerHTML = `<input type="checkbox" id="${id}" ${on?'checked':''}/> ${c.label}`;
+    const input = row.querySelector('input');
+    input.addEventListener('change', (e)=>{
+      const curr = loadColPrefs();
+      const np = Object.assign({}, curr, { [c.key]: e.target.checked });
+      saveColPrefs(np); applyVisibility(np); e.stopPropagation();
+    });
+    wrap.appendChild(row);
+  });
+}
+
+function buildPager(curr, total){
+  const host = document.getElementById('pager');
+  host.innerHTML='';
+  if(!total || total<=1){ return; }
+  const addBtn=(label,page,opts={})=>{
+    const b=document.createElement('button');
+    b.textContent=label; b.className='num'+(opts.active?' active':'');
+    if(opts.disabled){ b.disabled=true; }
+    b.addEventListener('click', ()=>{ if(!opts.disabled){ state.page=page; load(); }});
+    host.appendChild(b);
+  };
+  const addEll=()=>{ const s=document.createElement('span'); s.className='ellipsis'; s.textContent='…'; host.appendChild(s); };
+  addBtn('«', 1, {disabled: curr===1});
+  addBtn('‹', Math.max(1, curr-1), {disabled: curr===1});
+  const set=new Set([1,2,total-1,total,curr-2,curr-1,curr,curr+1,curr+2]);
+  const pages=Array.from(set).filter(p=>p>=1&&p<=total).sort((a,b)=>a-b);
+  let last=0;
+  pages.forEach(p=>{ if(p-last>1) addEll(); addBtn(String(p), p, {active:p===curr}); last=p; });
+  addBtn('›', Math.min(total, curr+1), {disabled: curr===total});
+  addBtn('»', total, {disabled: curr===total});
+}
+
+// ===== Data Load =====
+async function load(){
+  showBusy(true);
+  writeURL(true);
+  const params = new URLSearchParams(state);
+  let res;
+  try{ res = await fetch(`/inventory?${params.toString()}`, { credentials:'same-origin' }); }
+  catch(err){ showBusy(false); alert('네트워크 오류'); return; }
+  const ct = (res.headers.get('content-type')||'').toLowerCase();
+  if(!ct.includes('application/json')){ location.href='/login'; return; }
+  let json;
+  try{ json = await res.json(); }
+  catch(err){ showBusy(false); alert('JSON 파싱 실패'); return; }
+  if(json.status==='error'){ showBusy(false); alert('에러: '+json.message); return; }
+
+  tbody.innerHTML = '';
+  (json.data||[]).forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.className='clickable';
+    tr.dataset.code = r.item_code; // ✅ 행에서 품목코드 추적
+    tr.innerHTML = `
+      <td class="col-CATEGORY_NAME">${r.category_name||''}</td>
+      <td class="col-MAKER_NAME">${r.maker_name||''}</td>
+      <td class="col-ITEM_NAME">${r.item_name||''}</td>
+      <td class="col-ITEM_SPEC">${r.item_spec||''}</td>
+      <td class="col-STOCK">${r.stock ?? 0}</td>`;
+    tr.addEventListener('click', ()=> openDetail(r.item_code));
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('pageInfo').textContent = `페이지 ${json.page} / ${json.total_pages} · 총 ${json.total_count}건`;
+  document.getElementById('status').textContent = '';
+  buildPager(json.page, json.total_pages);
+
+  applyVisibility(loadColPrefs());
+  showBusy(false);
+}
+
+// ===== Detail =====
+async function openDetail(code){
+  showBusy(true);
+  try{
+    const res = await fetch(`/inventory/item/${encodeURIComponent(code)}`, { credentials:'same-origin' });
+    const ct = (res.headers.get('content-type')||'').toLowerCase();
+    if(!ct.includes('application/json')){ location.href='/login'; return; }
+    const d = await res.json();
+    renderDetail(d);
+  }catch(e){ alert('상세 조회 실패'); }
+  finally{ showBusy(false); }
+}
+function renderDetail(d){
+  if(!d || !d.item_code){ alert('데이터 없음'); return; }
+  window.currentCode = d.item_code;
+  document.getElementById('dTitle').textContent = `${d.item_code} · ${d.item_name||''}`;
+  const g = document.getElementById('dGrid');
+  g.innerHTML = '';
+  const addKV = (k,v,id)=>{
+    const kdiv=document.createElement('div'); kdiv.textContent=k;
+    const vdiv=document.createElement('div'); vdiv.textContent=(v??'');
+    if(id) vdiv.id = id;
+    g.appendChild(kdiv); g.appendChild(vdiv);
+  };
+  addKV('분류', d.category_name);
+  addKV('제조사', d.maker_name);
+  addKV('규격', d.item_spec);
+  addKV('재질', d.material_name);
+  addKV('현재고', d.stock, 'dStock'); // ✅ 식별 가능한 현재고 DOM
+  addKV('위치', d.item_location);
+  if(d.item_note) addKV('비고', d.item_note);
+
+  const hist = d.history||[]; const tb = document.getElementById('dHist'); tb.innerHTML='';
+  hist.forEach(h=>{
+    const tr = document.createElement('tr');
+    const type = (h.inout_type||'').toUpperCase();
+    const label = type==='IN' ? '입고' : (type==='OUT' ? '출고' : type);
+    const cls = type==='IN' ? 'pill in' : (type==='OUT' ? 'pill out' : '');
+    tr.innerHTML = `<td>${h.trans_date? new Date(h.trans_date).toLocaleString():''}</td><td><span class="${cls}">${label}</span></td><td style="text-align:right">${h.qty??0}</td><td>${h.detail_note||''}</td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById('detailModal').classList.add('open');
+}
+
+// ===== Events =====
+document.getElementById('btnSearch').addEventListener('click', ()=>{ state.q=document.getElementById('q').value.trim(); state.page=1; load(); });
+document.getElementById('q').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ state.q=document.getElementById('q').value.trim(); state.page=1; load(); }});
+document.getElementById('perPage').addEventListener('change', (e)=>{ state.per_page=parseInt(e.target.value,10)||20; state.page=1; load(); });
+
+Array.from(document.querySelectorAll('th.sortable')).forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const col = th.getAttribute('data-col');
+    if(state.sort_col===col){ state.sort_dir = (state.sort_dir==='ASC'?'DESC':'ASC'); }
+    else { state.sort_col = col; state.sort_dir='ASC'; }
+    state.page = 1; load();
+  });
+});
+
+const btnLogout = document.getElementById('btnLogout');
+if(btnLogout){ btnLogout.addEventListener('click', ()=>{ if(confirm('로그아웃 하시겠습니까?')) location.href='/logout'; }); }
+
+const menuWrap = document.getElementById('colMenuWrap');
+document.getElementById('btnCols').addEventListener('click', ()=>{ menuWrap.classList.toggle('open'); });
+document.addEventListener('click', (e)=>{ if(!menuWrap.contains(e.target)) menuWrap.classList.remove('open'); });
+
+const dModal = document.getElementById('detailModal');
+document.getElementById('dClose').addEventListener('click', ()=> dModal.classList.remove('open'));
+dModal.addEventListener('click', (e)=>{ if(e.target===dModal) dModal.classList.remove('open'); });
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') dModal.classList.remove('open'); });
+
+window.addEventListener('DOMContentLoaded', ()=>{ buildColMenu(); applyVisibility(loadColPrefs()); readURL(); load(); });
+window.addEventListener('popstate', ()=>{ readURL(); load(); });
+
+// ===== 입/출고 처리 =====
+document.getElementById('txnConfirm').addEventListener('click', async ()=>{
+  const type = document.getElementById('txnType').value;
+  const qty = parseInt(document.getElementById('txnQty').value, 10);
+  const note = document.getElementById('txnNote').value.trim();
+  if(!window.currentCode){ alert('품목코드가 없습니다. 다시 시도하세요.'); return; }
+  if(!qty || qty <= 0){ alert('수량을 입력하세요'); return; }
+
+  try{
+    const res = await fetch('/inventory/txn', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ item_code: window.currentCode, inout_type:type, qty, note })
+    });
+    const j = await res.json();
+    if(!j.success){ alert(j.message || '처리 실패'); return; }
+
+    // 모달 현재고 반영
+    const dStock = document.getElementById('dStock');
+    if(dStock) dStock.textContent = j.new_stock;
+
+    // 리스트 행 현재고 즉시 반영
+    const row = document.querySelector(`tr[data-code="${window.currentCode}"] td.col-STOCK`);
+    if(row) row.textContent = j.new_stock;
+
+    // 이력 상단 추가
+    const tr = document.createElement('tr');
+    const _label = type==='IN' ? '입고' : '출고';
+    const _cls = type==='IN' ? 'pill in' : 'pill out';
+    tr.innerHTML = `<td>${new Date().toLocaleString()}</td><td><span class="${_cls}">${_label}</span></td><td style=\"text-align:right\">${qty}</td><td>${note||''}</td>`;
+    document.getElementById('dHist').prepend(tr);
+
+    // 입력 초기화
+    document.getElementById('txnQty').value='';
+    document.getElementById('txnNote').value='';
+  }catch(e){ alert('에러: '+e); }
+});
+</script>
+</body>
+</html>

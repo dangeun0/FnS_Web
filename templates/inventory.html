@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}재고 목록{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="분류/제조사/부품명/규격/위치 검색…" />
+      <select id="perPage">
+        <option value="10">10개</option>
+        <option value="20" selected>20개</option>
+        <option value="50">50개</option>
+        <option value="100">100개</option>
+      </select>
+      <button class="primary" id="btnSearch">검색</button>
+      <div class="muted" id="status"></div>
+      <div class="menu" id="colMenuWrap">
+        <button id="btnCols">열 표시/숨김 ▾</button>
+        <div class="panel" id="colMenu"></div>
+      </div>
+    </div>
+
+    <div style="overflow:auto;max-height:70vh">
+      {% include "partials/_list.html" %}
+    </div>
+
+    <div class="meta">
+      <div id="pageInfo" class="muted">-</div>
+      <div class="pager" id="pager"></div>
+    </div>
+  </div>
+
+  <div id="spinner" class="spinner hidden">로딩 중…</div>
+
+  {% include "partials/_modal.html" %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/inventory.js') }}"></script>
+{% endblock %}

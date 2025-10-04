@@ -1,0 +1,53 @@
+<div class="modal fade" id="orderFormModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square"></i> 신규/수정 발주</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="orderForm" class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">관리번호</label>
+            <input type="text" name="manage_no" class="form-control" placeholder="예) 0P8255A-2412-14" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">발주일자</label>
+            <input type="date" name="order_date" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">고객사</label>
+            <input type="text" name="customer" class="form-control" placeholder="예) 삼성">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">제품군</label>
+            <input type="text" name="product_group" class="form-control" placeholder="예) Simple">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">진행상태</label>
+            <select name="progress_status" class="form-select">
+              <option value="">선택</option>
+              <option>설계</option>
+              <option>사급</option>
+              <option>가공</option>
+              <option>조립</option>
+              <option>납품</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">수량</label>
+            <input type="number" name="qty" class="form-control" min="0" step="1">
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">비고</label>
+            <textarea name="remarks" class="form-control" rows="3" placeholder="특이사항을 입력하세요"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+        <button type="submit" form="orderForm" class="btn btn-primary">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
