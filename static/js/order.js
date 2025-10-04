@@ -3,27 +3,17 @@ document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("order-detail-root")) initOrderDetail();
 });
 
-// 상태값을 CSS 클래스 이름으로 안전하게 변환
-//function toStatusClass(status) {
-//  if (!status) return "";
-//  return "status-" + status.replace(/\s+/g, "").trim();
-//}
 function toStatusClass(status) {
   if (!status) return "";
   const normalized = status.trim();
-
-  // 상태값 변환 매핑
   const map = {
     "완료": "납품",
     "납품완료": "납품",
-    "진행중": "가공", // 필요 시 추가
-    "HOLD": "설계"
+    "진행중": "가공"
   };
-
   const key = map[normalized] || normalized;
   return "status-" + key.replace(/\s+/g, "");
 }
-
 
 // =================== 발주 리스트 ===================
 function initOrderList() {
@@ -38,38 +28,47 @@ function initOrderList() {
       const res = await fetch(`/order/api/orders?${query}`);
       const data = await res.json();
       orderTableBody.innerHTML = "";
+
+      const headers = [
+        "관리번호","발주일자","진행상태","오더구분","사용처","발주처","제품군","소켓군","Ball type",
+        "품명1","품명2","수량","설계 시작","설계 종료","사급 1차","사급 2차","사급 3차",
+        "가공 1차","가공 최종","조립 시작","조립 종료","출고일자","비고"
+      ];
+
       data.forEach(row => {
         const tr = document.createElement("tr");
         const statusClass = toStatusClass(row.progress_status);
-        tr.innerHTML = `
-          <td class="nowrap sticky-col"><strong>${row.manage_no}</strong></td>
-          <td>${row.order_date || ''}</td>
-          <td><span class="badge status-badge ${statusClass}">${row.progress_status || ''}</span></td>
-          <td>${row.order_kind || ''}</td>
-          <td>${row.usage_location || ''}</td>
-          <td>${row.order_vendor || ''}</td>
-          <td>${row.product_group || ''}</td>
-          <td>${row.socket_group || ''}</td>
-          <td>${row.ball_type || ''}</td>
-          <td>${row.item_name1 || ''}</td>
-          <td>${row.item_name2 || ''}</td>
-          <td class="text-end">${row.qty_total || 0}</td>
-          <td>${row.design_start || ''}</td>
-          <td>${row.design_end || ''}</td>
-          <td>${row.supply_in1 || ''}</td>
-          <td>${row.supply_in2 || ''}</td>
-          <td>${row.supply_in3 || ''}</td>
-          <td>${row.process_in1 || ''}</td>
-          <td>${row.process_in_final || ''}</td>
-          <td>${row.assembly_start || ''}</td>
-          <td>${row.assembly_end || ''}</td>
-          <td>${row.ship_date || ''}</td>
-          <td>${row.remarks || ''}</td>`;
-        tr.addEventListener("click", () => {
-          window.location.href = `/order/detail/${row.manage_no}`;
-        });
+        const cells = [
+          `<strong>${row.manage_no}</strong>`,
+          row.order_date || '',
+          `<span class="badge status-badge ${statusClass}">${row.progress_status || ''}</span>`,
+          row.order_kind || '',
+          row.usage_location || '',
+          row.order_vendor || '',
+          row.product_group || '',
+          row.socket_group || '',
+          row.ball_type || '',
+          row.item_name1 || '',
+          row.item_name2 || '',
+          (row.qty_total || 0).toLocaleString(),
+          row.design_start || '',
+          row.design_end || '',
+          row.supply_in1 || '',
+          row.supply_in2 || '',
+          row.supply_in3 || '',
+          row.process_in1 || '',
+          row.process_in_final || '',
+          row.assembly_start || '',
+          row.assembly_end || '',
+          row.ship_date || '',
+          row.remarks || ''
+        ];
+
+        tr.innerHTML = cells.map((val, i) => `<td data-label='${headers[i]}'>${val}</td>`).join('');
+        tr.addEventListener("click", () => window.location.href = `/order/detail/${row.manage_no}`);
         orderTableBody.appendChild(tr);
       });
+
       const info = document.getElementById("tableInfo");
       if (info) info.textContent = `총 ${data.length}건`;
     } catch (err) {

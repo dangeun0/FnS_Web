@@ -37,3 +37,49 @@ body { background:#f9fafb; }
 .timeline-step.in-progress { border-color:#dc3545; border-width:4px; }
 .timeline-step.pending { border-color:#0d6efd; }
 .section-card.delivery-highlight { border:2px solid #dc3545; background-color:#fdeaea; }
+
+/* ====================== 반응형 카드형 리스트 ====================== */
+@media (max-width: 768px) {
+  #orderTable,
+  #orderTable thead,
+  #orderTable tbody,
+  #orderTable th,
+  #orderTable td,
+  #orderTable tr {
+    display: block;
+    width: 100%;
+  }
+
+  #orderTable thead {
+    display: none; /* 헤더 감춤 */
+  }
+
+  #orderTable tr {
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+    padding: 0.5rem 0.75rem;
+  }
+
+  #orderTable td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border: none;
+    font-size: 0.9rem;
+  }
+
+  #orderTable td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .sticky-col {
+    position: static !important;
+    box-shadow: none !important;
+  }
+}
