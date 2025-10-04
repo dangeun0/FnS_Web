@@ -64,7 +64,8 @@ function initOrderList() {
           row.remarks || ''
         ];
 
-        tr.innerHTML = cells.map((val, i) => `<td data-label='${headers[i]}'>${val}</td>`).join('');
+        // ✅ 각 셀 내용을 <span>으로 감싸서 카드형 표시 지원
+        tr.innerHTML = cells.map((val, i) => `<td data-label='${headers[i]}'><span>${val}</span></td>`).join('');
         tr.addEventListener("click", () => window.location.href = `/order/detail/${row.manage_no}`);
         orderTableBody.appendChild(tr);
       });
