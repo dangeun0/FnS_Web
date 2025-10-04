@@ -1,8 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // 의존성 최소화를 위해 DOM 존재 여부로 분기 (body data-* 불필요)
   if (document.getElementById("orderTableBody")) initOrderList();
   if (document.getElementById("order-detail-root")) initOrderDetail();
 });
+
+// 상태값을 CSS 클래스 이름으로 안전하게 변환
+function toStatusClass(status) {
+  if (!status) return "";
+  return "status-" + status.replace(/\s+/g, "").trim();
+}
 
 // =================== 발주 리스트 ===================
 function initOrderList() {
@@ -19,10 +24,11 @@ function initOrderList() {
       orderTableBody.innerHTML = "";
       data.forEach(row => {
         const tr = document.createElement("tr");
+        const statusClass = toStatusClass(row.progress_status);
         tr.innerHTML = `
           <td class="nowrap sticky-col"><strong>${row.manage_no}</strong></td>
           <td>${row.order_date || ''}</td>
-          <td><span class="badge status-badge status-${row.progress_status}">${row.progress_status || ''}</span></td>
+          <td><span class="badge status-badge ${statusClass}">${row.progress_status || ''}</span></td>
           <td>${row.order_kind || ''}</td>
           <td>${row.usage_location || ''}</td>
           <td>${row.order_vendor || ''}</td>
@@ -43,7 +49,6 @@ function initOrderList() {
           <td>${row.assembly_end || ''}</td>
           <td>${row.ship_date || ''}</td>
           <td>${row.remarks || ''}</td>`;
-        // 상세 페이지 이동
         tr.addEventListener("click", () => {
           window.location.href = `/order/detail/${row.manage_no}`;
         });
@@ -75,7 +80,6 @@ function initOrderList() {
   }
 
   if (reloadBtn) reloadBtn.addEventListener("click", () => loadOrders());
-
   loadOrders();
 }
 
@@ -89,19 +93,19 @@ async function initOrderDetail() {
     if (!res.ok) return;
     const data = await res.json();
 
-    // 기본 정보 채우기
     const info = document.querySelector(".section-card .card-body");
+    const statusClass = toStatusClass(data.progress_status);
     if (info) {
       info.innerHTML = `
         <h5 class="card-title text-primary"><i class="bi bi-info-circle"></i> 발주 기본 정보</h5>
         <p>관리번호: <strong>${data.manage_no}</strong></p>
         <p>발주일자: <strong>${data.order_date || ''}</strong></p>
-        <p>진행상태: <span class="badge bg-danger">${data.progress_status || ''}</span> &nbsp;&nbsp; 고객사: <strong>${data.customer || ''}</strong></p>
+        <p>진행상태: <span class="badge status-badge ${statusClass}">${data.progress_status || ''}</span>
+           &nbsp;&nbsp; 고객사: <strong>${data.customer || ''}</strong></p>
         <p>제품군: <strong>${data.product_group || ''}</strong> &nbsp;&nbsp; 수량: <strong>${data.qty_total || 0}</strong></p>
         <p>비고: <strong>${data.remarks || ''}</strong></p>`;
     }
 
-    // 타임라인 (초기엔 요약만, 추후 단계별 세부 목록/편집 연동 예정)
     const timeline = document.querySelector(".timeline");
     if (timeline) {
       timeline.innerHTML = `
