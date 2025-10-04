@@ -4,10 +4,26 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // 상태값을 CSS 클래스 이름으로 안전하게 변환
+//function toStatusClass(status) {
+//  if (!status) return "";
+//  return "status-" + status.replace(/\s+/g, "").trim();
+//}
 function toStatusClass(status) {
   if (!status) return "";
-  return "status-" + status.replace(/\s+/g, "").trim();
+  const normalized = status.trim();
+
+  // 상태값 변환 매핑
+  const map = {
+    "완료": "납품",
+    "납품완료": "납품",
+    "진행중": "가공", // 필요 시 추가
+    "HOLD": "설계"
+  };
+
+  const key = map[normalized] || normalized;
+  return "status-" + key.replace(/\s+/g, "");
 }
+
 
 // =================== 발주 리스트 ===================
 function initOrderList() {
