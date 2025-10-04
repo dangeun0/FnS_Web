@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
+{% block title %}발주 관리{% endblock %}
+
 {% block content %}
-<div class="container-fluid my-3">
+<!-- 페이지 전용 CSS 로드 (모듈화) -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/order.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="container my-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="fw-bold"><i class="bi bi-card-list"></i> 발주 관리 리스트</h4>
     <div class="d-flex gap-2">
@@ -12,27 +19,26 @@
     </div>
   </div>
 
-  <!-- 접는 필터 / 검색 -->
   <div id="filterArea" class="collapse">
     <div class="page-card bg-white p-3 mb-3">
       <form class="row g-3 filter-row" id="searchForm">
-        <div class="col-12 col-md-3">
+        <div class="col-md-3">
           <label class="form-label">발주일자(시작)</label>
           <input type="date" class="form-control" name="order_date_start" />
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-md-3">
           <label class="form-label">발주일자(종료)</label>
           <input type="date" class="form-control" name="order_date_end" />
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-md-3">
           <label class="form-label">고객사</label>
           <input type="text" class="form-control" name="customer" placeholder="예) 삼성" />
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-md-3">
           <label class="form-label">제품군</label>
           <input type="text" class="form-control" name="product_group" placeholder="예) Simple" />
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-md-3">
           <label class="form-label">진행상태</label>
           <select class="form-select" name="progress_status">
             <option value="">전체</option>
@@ -43,11 +49,11 @@
             <option>납품</option>
           </select>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-md-3">
           <label class="form-label">관리번호</label>
           <input type="text" class="form-control" name="manage_no" placeholder="예) 0P8255A-2412-14" />
         </div>
-        <div class="col-12 col-md-6 d-flex align-items-end justify-content-end gap-2">
+        <div class="col-12 d-flex justify-content-end gap-2">
           <button type="reset" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> 초기화</button>
           <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> 검색</button>
         </div>
@@ -55,64 +61,45 @@
     </div>
   </div>
 
-  <!-- 데스크톱: 데이터 로드 테이블 -->
-  <div class="table-card bg-white d-none d-md-block">
+  <div class="table-card bg-white">
     <div class="table-responsive">
       <table class="table table-hover mb-0 align-middle wide-table" id="orderTable">
         <thead>
           <tr>
             <th class="nowrap sticky-col">관리번호</th>
-            <th class="nowrap">발주일자</th>
-            <th class="nowrap">진행상태</th>
-            <th class="nowrap">오더구분</th>
-            <th class="nowrap">사용처</th>
-            <th class="nowrap">발주처</th>
-            <th class="nowrap">제품군</th>
-            <th class="nowrap">소켓군</th>
-            <th class="nowrap">Ball type</th>
-            <th class="nowrap">품명1</th>
-            <th class="nowrap">품명2</th>
-            <th class="text-end nowrap">수량</th>
-            <th class="nowrap">설계 시작</th>
-            <th class="nowrap">설계 종료</th>
-            <th class="nowrap">사급 1차</th>
-            <th class="nowrap">사급 2차</th>
-            <th class="nowrap">사급 3차</th>
-            <th class="nowrap">가공 1차</th>
-            <th class="nowrap">가공 최종</th>
-            <th class="nowrap">조립 시작</th>
-            <th class="nowrap">조립 종료</th>
-            <th class="nowrap">출고일자</th>
-            <th class="nowrap">비고</th>
+            <th>발주일자</th>
+            <th>진행상태</th>
+            <th>오더구분</th>
+            <th>사용처</th>
+            <th>발주처</th>
+            <th>제품군</th>
+            <th>소켓군</th>
+            <th>Ball type</th>
+            <th>품명1</th>
+            <th>품명2</th>
+            <th class="text-end">수량</th>
+            <th>설계 시작</th>
+            <th>설계 종료</th>
+            <th>사급 1차</th>
+            <th>사급 2차</th>
+            <th>사급 3차</th>
+            <th>가공 1차</th>
+            <th>가공 최종</th>
+            <th>조립 시작</th>
+            <th>조립 종료</th>
+            <th>출고일자</th>
+            <th>비고</th>
           </tr>
         </thead>
-        <tbody id="orderTableBody">
-          <!-- DB 데이터가 로드될 영역 -->
-        </tbody>
+        <tbody id="orderTableBody"></tbody>
       </table>
     </div>
-    <div class="d-flex flex-wrap justify-content-between align-items-center p-2">
-      <div class="text-muted small" id="tableInfo">총 0건</div>
-    </div>
+    <div class="p-2 small text-muted" id="tableInfo">총 0건</div>
   </div>
-
-  <!-- 상세/수정 모달 -->
-  {% include 'order/partials/_modal.html' %}
-
-  <!-- 신규/수정 입력 폼 -->
-  {% include 'order/partials/_form.html' %}
 </div>
+{% endblock %}
 
-<!-- ✅ Bootstrap CSS 추가 -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-<!-- 기존 order.css -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/order.css') }}">
-
-<!-- 기존 order.js -->
-<script src="{{ url_for('static', filename='js/order.js') }}"></script>
-
-<!-- ✅ Bootstrap JS 추가 -->
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/order.js') }}"></script>
 {% endblock %}

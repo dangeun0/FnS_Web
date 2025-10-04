@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // 의존성 최소화를 위해 DOM 존재 여부로 분기 (body data-* 불필요)
+  if (document.getElementById("orderTableBody")) initOrderList();
+  if (document.getElementById("order-detail-root")) initOrderDetail();
+});
+
+// =================== 발주 리스트 ===================
+function initOrderList() {
   const orderTableBody = document.getElementById("orderTableBody");
   const searchForm = document.getElementById("searchForm");
   const btnNewOrder = document.getElementById("btnNewOrder");
@@ -14,82 +21,97 @@ document.addEventListener("DOMContentLoaded", () => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td class="nowrap sticky-col"><strong>${row.manage_no}</strong></td>
-          <td class="nowrap">${row.order_date || ''}</td>
-          <td class="nowrap"><span class="badge status-badge status-${row.progress_status}">${row.progress_status || ''}</span></td>
-          <td class="nowrap">${row.order_kind || ''}</td>
-          <td class="nowrap">${row.usage_location || ''}</td>
-          <td class="nowrap">${row.order_vendor || ''}</td>
-          <td class="nowrap">${row.product_group || ''}</td>
-          <td class="nowrap">${row.socket_group || ''}</td>
-          <td class="nowrap">${row.ball_type || ''}</td>
-          <td class="nowrap">${row.item_name1 || ''}</td>
-          <td class="nowrap">${row.item_name2 || ''}</td>
-          <td class="text-end nowrap">${row.qty_total || 0}</td>
-          <td class="nowrap">${row.design_start || ''}</td>
-          <td class="nowrap">${row.design_end || ''}</td>
-          <td class="nowrap">${row.supply_in1 || ''}</td>
-          <td class="nowrap">${row.supply_in2 || ''}</td>
-          <td class="nowrap">${row.supply_in3 || ''}</td>
-          <td class="nowrap">${row.process_in1 || ''}</td>
-          <td class="nowrap">${row.process_in_final || ''}</td>
-          <td class="nowrap">${row.assembly_start || ''}</td>
-          <td class="nowrap">${row.assembly_end || ''}</td>
-          <td class="nowrap">${row.ship_date || ''}</td>
-          <td class="nowrap">${row.remarks || ''}</td>
-        `;
-        //tr.addEventListener("click", () => showOrderDetail(row.manage_no));
-          // ✅ 상세 페이지로 이동
+          <td>${row.order_date || ''}</td>
+          <td><span class="badge status-badge status-${row.progress_status}">${row.progress_status || ''}</span></td>
+          <td>${row.order_kind || ''}</td>
+          <td>${row.usage_location || ''}</td>
+          <td>${row.order_vendor || ''}</td>
+          <td>${row.product_group || ''}</td>
+          <td>${row.socket_group || ''}</td>
+          <td>${row.ball_type || ''}</td>
+          <td>${row.item_name1 || ''}</td>
+          <td>${row.item_name2 || ''}</td>
+          <td class="text-end">${row.qty_total || 0}</td>
+          <td>${row.design_start || ''}</td>
+          <td>${row.design_end || ''}</td>
+          <td>${row.supply_in1 || ''}</td>
+          <td>${row.supply_in2 || ''}</td>
+          <td>${row.supply_in3 || ''}</td>
+          <td>${row.process_in1 || ''}</td>
+          <td>${row.process_in_final || ''}</td>
+          <td>${row.assembly_start || ''}</td>
+          <td>${row.assembly_end || ''}</td>
+          <td>${row.ship_date || ''}</td>
+          <td>${row.remarks || ''}</td>`;
+        // 상세 페이지 이동
         tr.addEventListener("click", () => {
-        window.location.href = `/order/detail/${row.manage_no}`;
+          window.location.href = `/order/detail/${row.manage_no}`;
         });
         orderTableBody.appendChild(tr);
       });
-      document.getElementById("tableInfo").textContent = `총 ${data.length}건`;
+      const info = document.getElementById("tableInfo");
+      if (info) info.textContent = `총 ${data.length}건`;
     } catch (err) {
       console.error("데이터 로드 실패", err);
     }
   }
 
-  async function showOrderDetail(manageNo) {
-    try {
-      const res = await fetch(`/order/api/order/${manageNo}`);
-      if (!res.ok) return;
-      const data = await res.json();
-      const detailDiv = document.getElementById("orderDetailContent");
-      detailDiv.innerHTML = `
-        <dl class="row">
-          <dt class="col-sm-3">관리번호</dt><dd class="col-sm-9">${data.manage_no}</dd>
-          <dt class="col-sm-3">발주일자</dt><dd class="col-sm-9">${data.order_date || ''}</dd>
-          <dt class="col-sm-3">진행상태</dt><dd class="col-sm-9">${data.progress_status || ''}</dd>
-          <dt class="col-sm-3">고객사</dt><dd class="col-sm-9">${data.customer || ''}</dd>
-          <dt class="col-sm-3">제품군</dt><dd class="col-sm-9">${data.product_group || ''}</dd>
-          <dt class="col-sm-3">수량</dt><dd class="col-sm-9">${data.qty_total || 0}</dd>
-          <dt class="col-sm-3">비고</dt><dd class="col-sm-9">${data.remarks || ''}</dd>
-        </dl>
-      `;
-      const modal = new bootstrap.Modal(document.getElementById("orderDetailModal"));
-      modal.show();
-    } catch (err) {
-      console.error("상세 조회 실패", err);
-    }
+  if (searchForm) {
+    searchForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const params = Object.fromEntries(new FormData(searchForm).entries());
+      loadOrders(params);
+    });
   }
 
-  // 검색 이벤트
-  searchForm.addEventListener("submit", e => {
-    e.preventDefault();
-    const params = Object.fromEntries(new FormData(searchForm).entries());
-    loadOrders(params);
-  });
+  if (btnNewOrder) {
+    btnNewOrder.addEventListener("click", () => {
+      const modalEl = document.getElementById("orderFormModal");
+      if (modalEl && window.bootstrap) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+      }
+    });
+  }
 
-  // 신규 발주 버튼 이벤트
-  btnNewOrder.addEventListener("click", () => {
-    const modal = new bootstrap.Modal(document.getElementById("orderFormModal"));
-    modal.show();
-  });
+  if (reloadBtn) reloadBtn.addEventListener("click", () => loadOrders());
 
-  // 새로고침 버튼 이벤트
-  reloadBtn.addEventListener("click", () => loadOrders());
-
-  // 초기 로딩
   loadOrders();
-});
+}
+
+// =================== 발주 상세 ===================
+async function initOrderDetail() {
+  const root = document.getElementById("order-detail-root");
+  const manageNo = root?.dataset.manageNo || window.__ORDER_DETAIL_MANAGE_NO__;
+  if (!manageNo) return;
+  try {
+    const res = await fetch(`/order/api/order/${manageNo}`);
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // 기본 정보 채우기
+    const info = document.querySelector(".section-card .card-body");
+    if (info) {
+      info.innerHTML = `
+        <h5 class="card-title text-primary"><i class="bi bi-info-circle"></i> 발주 기본 정보</h5>
+        <p>관리번호: <strong>${data.manage_no}</strong></p>
+        <p>발주일자: <strong>${data.order_date || ''}</strong></p>
+        <p>진행상태: <span class="badge bg-danger">${data.progress_status || ''}</span> &nbsp;&nbsp; 고객사: <strong>${data.customer || ''}</strong></p>
+        <p>제품군: <strong>${data.product_group || ''}</strong> &nbsp;&nbsp; 수량: <strong>${data.qty_total || 0}</strong></p>
+        <p>비고: <strong>${data.remarks || ''}</strong></p>`;
+    }
+
+    // 타임라인 (초기엔 요약만, 추후 단계별 세부 목록/편집 연동 예정)
+    const timeline = document.querySelector(".timeline");
+    if (timeline) {
+      timeline.innerHTML = `
+        <div class="timeline-step completed"><h6 class="design-color"><i class="bi bi-pencil-square"></i> 설계</h6><p>시작일: ${data.design_start || '-'} / 종료일: ${data.design_end || '-'}</p></div>
+        <div class="timeline-step completed"><h6 class="supply-color"><i class="bi bi-truck"></i> 사급</h6><p>최근 납품일: ${data.supply_date || '-'}</p></div>
+        <div class="timeline-step completed"><h6 class="process-color"><i class="bi bi-gear"></i> 가공</h6><p>입고1차: ${data.process_in1 || '-'} / 최종: ${data.process_in_final || '-'}</p></div>
+        <div class="timeline-step completed"><h6 class="assembly-color"><i class="bi bi-hammer"></i> 조립</h6><p>시작일: ${data.assembly_start || '-'} / 종료일: ${data.assembly_end || '-'}</p></div>
+        <div class="timeline-step in-progress"><h6 class="delivery-color"><i class="bi bi-box-arrow-up"></i> 납품</h6><p>출고일: ${data.delivery_date || '-'}</p></div>`;
+    }
+  } catch (err) {
+    console.error("상세 데이터 로드 실패", err);
+  }
+}
