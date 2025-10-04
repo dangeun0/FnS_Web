@@ -38,7 +38,7 @@ body { background:#f9fafb; }
 .timeline-step.pending { border-color:#0d6efd; }
 .section-card.delivery-highlight { border:2px solid #dc3545; background-color:#fdeaea; }
 
-/* ====================== 반응형 카드형 리스트 (개선) ====================== */
+/* ====================== 강제 적용 반응형 카드 리스트 ====================== */
 @media (max-width: 768px) {
   #orderTable,
   #orderTable thead,
@@ -46,31 +46,31 @@ body { background:#f9fafb; }
   #orderTable th,
   #orderTable td,
   #orderTable tr {
-    display: block;
-    width: 100%;
+    display: block !important;
+    width: 100% !important;
   }
 
   #orderTable thead {
-    display: none; /* 헤더 감춤 */
+    display: none !important;
   }
 
   #orderTable tr {
     margin-bottom: 1rem;
     border: 1px solid #dee2e6;
     border-radius: 0.75rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     background-color: #fff;
     padding: 0.75rem;
   }
 
   #orderTable td {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 0.35rem 0;
-    border: none;
-    font-size: 0.9rem;
-    word-break: break-word;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    padding: 0.4rem 0.75rem !important;
+    border: none !important;
+    font-size: 0.9rem !important;
+    word-break: break-word !important;
   }
 
   #orderTable td::before {
@@ -81,8 +81,7 @@ body { background:#f9fafb; }
     max-width: 40%;
   }
 
-  #orderTable td span,
-  #orderTable td strong {
+  #orderTable td span {
     display: inline-block;
     max-width: 58%;
     text-align: right;
@@ -90,10 +89,9 @@ body { background:#f9fafb; }
     overflow-wrap: break-word;
   }
 
-  /* sticky 해제 */
   .sticky-col {
     position: static !important;
     box-shadow: none !important;
+    background: transparent !important;
   }
 }
-
