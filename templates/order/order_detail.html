@@ -1,34 +1,8 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>발주 상세 페이지</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    body { background-color: #f9fafb; }
-    .section-card { margin-bottom: 1.5rem; border-radius: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-    .section-card h5 { font-weight: bold; display:flex; align-items:center; gap:8px; font-size:1.25rem; }
-    .btn-action { font-size: 0.9rem; color:#0d6efd; }
-    .navbar-brand { font-weight: bold; color: #0056b3 !important; }
-
-    .timeline-step { margin-bottom:1.5rem; border:2px solid; border-radius:0.5rem; padding:1rem; background:#fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-    .timeline-step.completed { border-color:#adb5bd; }
-    .timeline-step.in-progress { border-color:#dc3545; border-width:4px; }
-    .timeline-step.pending { border-color:#0d6efd; }
-
-    .timeline-step h6 { margin-bottom:0.3rem; display:flex; align-items:center; gap:6px; font-weight:bold; font-size:1.25rem; }
-    .design-color { color:#0d6efd; font-weight:bold; }
-    .supply-color { color:#6f42c1; font-weight:bold; }
-    .process-color { color:#198754; font-weight:bold; }
-    .assembly-color { color:#fd7e14; font-weight:bold; }
-    .delivery-color { color:#dc3545; font-weight:bold; }
-
-    .section-card.delivery-highlight { border:2px solid #dc3545; background-color:#fdeaea; }
-  </style>
-</head>
-<body>
+<!-- ======================= order_detail.html ======================= -->
+{% extends 'base.html' %}
+{% block title %}발주 상세{% endblock %}
+{% block content %}
+<body data-page="order-detail" data-manage-no="{{ manage_no }}">
   <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
     <div class="container-fluid">
       <a class="navbar-brand" href="/order/list"><i class="bi bi-box-seam"></i> FnS Order</a>
@@ -40,85 +14,18 @@
   </nav>
 
   <div class="container my-4">
-    <h3 class="mb-4"><i class="bi bi-clipboard-check"></i> 발주 상세 페이지</h3>
-
     <div class="card section-card delivery-highlight">
-      <div class="card-body">
-        <h5 class="card-title text-primary"><i class="bi bi-info-circle"></i> 발주 기본 정보</h5>
-        <p>관리번호: <strong>{{ manage_no }}</strong></p>
-        <p>진행상태: <span class="badge bg-danger">납품</span> &nbsp;&nbsp; 고객사: <strong>삼성</strong></p>
-        <p>제품군: <strong>Simple</strong> &nbsp;&nbsp; 수량: <strong>100</strong></p>
-      </div>
+      <div class="card-body"></div>
     </div>
 
-    <div class="timeline">
-      <div class="timeline-step completed">
-        <div class="d-flex align-items-center justify-content-between">
-          <h6 class="mb-0 design-color"><i class="bi bi-pencil-square design-color"></i> 설계</h6>
-          <button class="btn btn-link btn-action p-0"><i class="bi bi-plus-circle"></i> 추가/수정</button>
-        </div>
-        <p>시작일: 25-10-01 &nbsp;&nbsp; 종료일: 25-10-10 &nbsp;&nbsp; 비고: …</p>
-      </div>
-      <div class="timeline-step completed">
-        <div class="d-flex align-items-center justify-content-between">
-          <h6 class="mb-0 supply-color"><i class="bi bi-truck supply-color"></i> 사급</h6>
-          <button class="btn btn-link btn-action p-0"><i class="bi bi-plus-circle"></i> 추가/수정</button>
-        </div>
-        <p>자재 발주 및 납품 일정 관리</p>
-      </div>
-      <div class="timeline-step completed">
-        <div class="d-flex align-items-center justify-content-between">
-          <h6 class="mb-0 process-color"><i class="bi bi-gear process-color"></i> 가공</h6>
-          <button class="btn btn-link btn-action p-0"><i class="bi bi-plus-circle"></i> 추가/수정</button>
-        </div>
-        <p>가공업체: 피엔텍<br>1차 입고: 25-10-15 &nbsp;&nbsp; 최종 입고: 25-10-20</p>
-      </div>
-      <div class="timeline-step completed">
-        <div class="d-flex align-items-center justify-content-between">
-          <h6 class="mb-0 assembly-color"><i class="bi bi-hammer assembly-color"></i> 조립</h6>
-          <button class="btn btn-link btn-action p-0"><i class="bi bi-plus-circle"></i> 추가/수정</button>
-        </div>
-        <p>시작일: 25-10-22 &nbsp;&nbsp; 종료일: 25-10-30</p>
-      </div>
-      <div class="timeline-step in-progress">
-        <div class="d-flex align-items-center justify-content-between">
-          <h6 class="mb-0 delivery-color"><i class="bi bi-box-arrow-up delivery-color"></i> 납품</h6>
-          <button class="btn btn-link btn-action p-0"><i class="bi bi-plus-circle"></i> 추가/수정</button>
-        </div>
-        <p>출고일자: 25-11-02 &nbsp;&nbsp; 수량: 100</p>
-      </div>
-    </div>
+    <div class="timeline"></div>
 
     <div class="d-flex justify-content-end gap-2">
-      <button class="btn btn-primary"><i class="bi bi-save"></i> 저장</button>
-      <button class="btn btn-secondary" onclick="location.href='/order/list'"><i class="bi bi-x-circle"></i> 취소</button>
+      <button class="btn btn-secondary" onclick="location.href='/order/list'"><i class="bi bi-arrow-left"></i> 목록</button>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-    const manageNo = "{{ manage_no }}";
-    try {
-        const res = await fetch(`/order/api/order/${manageNo}`);
-        if (!res.ok) return console.error("API 응답 오류");
-        const data = await res.json();
-
-        // 기본 정보 영역 채우기
-        document.querySelector(".card.section-card .card-body").innerHTML = `
-        <h5 class="card-title text-primary"><i class="bi bi-info-circle"></i> 발주 기본 정보</h5>
-        <p>관리번호: <strong>${data.manage_no}</strong></p>
-        <p>발주일자: <strong>${data.order_date || ''}</strong></p>
-        <p>진행상태: <span class="badge bg-danger">${data.progress_status || ''}</span> &nbsp;&nbsp; 고객사: <strong>${data.customer || ''}</strong></p>
-        <p>제품군: <strong>${data.product_group || ''}</strong> &nbsp;&nbsp; 수량: <strong>${data.qty_total || 0}</strong></p>
-        <p>비고: <strong>${data.remarks || ''}</strong></p>
-        `;
-    } catch (err) {
-        console.error("상세 데이터 로드 실패:", err);
-    }
-    });
-  </script>
-
-
+  <script src="{{ url_for('static', filename='js/order.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/order.css') }}">
 </body>
-</html>
+{% endblock %}
