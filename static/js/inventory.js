@@ -34,7 +34,7 @@ function loadColPrefs(){ try{ return JSON.parse(localStorage.getItem('inv_cols')
 function saveColPrefs(prefs){ localStorage.setItem('inv_cols', JSON.stringify(prefs)); }
 function applyVisibility(prefs){
   COLUMNS.forEach(c=>{
-    const on = prefs[c.key] !== false;
+    const on = prefs[c.key] !== false; // default: visible
     const th = document.querySelector(`th.col-${c.key}`);
     if(th) th.classList.toggle('hide', !on);
     document.querySelectorAll(`td.col-${c.key}`).forEach(td=> td.classList.toggle('hide', !on));
@@ -93,8 +93,7 @@ async function load(){
   writeURL(true);
   const params = new URLSearchParams(state);
   let res;
-  // [수정] API 호출 경로를 '/inventory/'로 변경
-  try{ res = await fetch(`/inventory/?${params.toString()}`, { credentials:'same-origin' }); }
+  try{ res = await fetch(`/inventory?${params.toString()}`, { credentials:'same-origin' }); }
   catch(err){ showBusy(false); alert('네트워크 오류'); return; }
   const ct = (res.headers.get('content-type')||'').toLowerCase();
   if(!ct.includes('application/json')){ location.href='/login'; return; }
@@ -192,7 +191,7 @@ document.getElementById('btnCols').addEventListener('click', ()=>{ menuWrap.clas
 document.addEventListener('click', (e)=>{ if(!menuWrap.contains(e.target)) menuWrap.classList.remove('open'); });
 
 const dModal = document.getElementById('detailModal');
-document.getElementById('dClose').addEventListener('click', ()=> dModal.classList.remove('open'); });
+document.getElementById('dClose').addEventListener('click', ()=> dModal.classList.remove('open'));
 dModal.addEventListener('click', (e)=>{ if(e.target===dModal) dModal.classList.remove('open'); });
 window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') dModal.classList.remove('open'); });
 

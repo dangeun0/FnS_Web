@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-
-print("--- [TEST] inventory.py is reloaded ---")
-
 from flask import Blueprint, request, jsonify, render_template, session
 import math, traceback
 from db import get_conn
 from auth import login_required
 
-inventory_bp = Blueprint('inventory', __name__, url_prefix='/inventory')
+inventory_bp = Blueprint('inventory', __name__)
 
-@inventory_bp.route('/page')
+@inventory_bp.route('/inventory/page')
 @login_required
 def page():
     return render_template('inventory.html')
@@ -32,7 +29,7 @@ def _parse_int(v, default, lo, hi):
     except Exception:
         return default
 
-@inventory_bp.route('/')
+@inventory_bp.route('/inventory')
 @login_required
 def inventory():
     page = _parse_int(request.args.get('page', 1), 1, 1, 10**9)
@@ -96,10 +93,9 @@ def inventory():
     except Exception:
         return jsonify({'status': 'error', 'message': traceback.format_exc()}), 500
 
-@inventory_bp.route('/item/<code>')
+@inventory_bp.route('/inventory/item/<code>')
 @login_required
 def item_detail(code):
-    # ...(이하 내용은 수정 없음)...
     try:
         with get_conn() as conn:
             cur = conn.cursor()
@@ -149,10 +145,13 @@ def item_detail(code):
     except Exception:
         return jsonify({'status': 'error', 'message': traceback.format_exc()}), 500
 
-@inventory_bp.route('/txn', methods=['POST'])
+@inventory_bp.route('/inventory/txn', methods=['POST'])
 @login_required
 def txn_process():
-    # ...(이하 내용은 수정 없음)...
+    """입고/출고 처리: PARTS_HISTORY insert 후 최신 재고 반환.
+    - 출고 시 현재고 부족이면 409 반환
+    - 사용자ID는 세션 user_id 사용
+    """
     try:
         data = request.get_json(force=True)
         code = (data.get('item_code') or '').strip()
@@ -167,6 +166,7 @@ def txn_process():
         with get_conn() as conn:
             cur = conn.cursor()
 
+            # 품목 존재 여부 + 현재고 조회
             cur.execute("SELECT NVL(STOCK,0) FROM V_PARTS_STOCK WHERE UPPER(ITEM_CODE)=UPPER(:c)", {'c': code})
             row = cur.fetchone()
             if not row:
@@ -176,6 +176,7 @@ def txn_process():
             if inout_type == 'OUT' and qty > curr_stock:
                 return jsonify(success=False, message="재고 부족"), 409
 
+            # 이력 입력
             cur.execute(
                 """
                 INSERT INTO PARTS_HISTORY (ITEM_CODE, INOUT_TYPE, QTY, DETAIL_NOTE, CREATED_BY)
@@ -185,13 +186,15 @@ def txn_process():
             )
             conn.commit()
 
+            # 최신 재고 재조회
             cur.execute("SELECT NVL(STOCK,0) FROM V_PARTS_STOCK WHERE UPPER(ITEM_CODE)=UPPER(:c)", {'c': code})
             new_stock = int(cur.fetchone()[0] or 0)
 
         return jsonify(success=True, new_stock=new_stock)
     except Exception:
+        # oracledb는 autocommit 아님: 예외 시 롤백 보장 필요
         try:
-            conn.rollback()
+            conn.rollback()  # type: ignore
         except Exception:
             pass
         return jsonify(success=False, message=traceback.format_exc()), 500
