@@ -96,40 +96,10 @@ body { background:#f9fafb; }
   }
 }
 
-/* ====================== Bootstrap 테이블 강제 덮어쓰기 ====================== */
 @media (max-width: 768px) {
-  /* 모든 테이블 레벨 display 속성 덮어쓰기 */
-  table#orderTable,
-  table#orderTable thead,
-  table#orderTable tbody,
-  table#orderTable th,
-  table#orderTable td,
-  table#orderTable tr {
-    display: block !important;
-    width: 100% !important;
-  }
-
-  /* 헤더 숨기기 */
-  table#orderTable thead {
-    display: none !important;
-  }
-
-  /* 카드형 행 스타일 */
-  table#orderTable tr {
-    margin-bottom: 1rem;
-    border: 1px solid #dee2e6;
-    border-radius: 0.75rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    background-color: #fff;
-    padding: 0.75rem;
-  }
-
-  /* 각 셀을 라벨/값 구조로 */
   table#orderTable td {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-    padding: 0.35rem 0.75rem !important;
+    display: block !important;
+    padding: 0.4rem 0.75rem !important;
     border: none !important;
     font-size: 0.9rem !important;
     word-break: break-word !important;
@@ -137,25 +107,27 @@ body { background:#f9fafb; }
 
   table#orderTable td::before {
     content: attr(data-label);
+    display: block;
     font-weight: 600;
     color: #495057;
-    flex: 0 0 40%;
-    max-width: 40%;
+    margin-bottom: 0.25rem;
   }
 
   table#orderTable td span {
-    display: inline-block;
-    max-width: 58%;
-    text-align: right;
+    display: block;
     color: #212529;
-    overflow-wrap: break-word;
+    text-align: left;
+    padding-left: 0.25rem;
   }
 
-  /* sticky 해제 */
-  table#orderTable .sticky-col {
-    position: static !important;
-    box-shadow: none !important;
-    background: transparent !important;
+  table#orderTable tr {
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    background-color: #fff;
+    padding: 0.5rem;
   }
 }
+
 
