@@ -140,3 +140,8 @@ body { background:#f9fafb; }
   table-layout: auto !important;
   overflow-x: visible !important;
 }
+
+.table-card {
+  max-width: none !important;
+  width: 100% !important;
+}
