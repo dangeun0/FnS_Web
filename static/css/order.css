@@ -95,3 +95,9 @@ body { background:#f9fafb; }
     background: transparent !important;
   }
 }
+
+@media (max-width: 768px) {
+  body {
+    background: #fff0f0 !important;
+  }
+}
