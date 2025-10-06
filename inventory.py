@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+print("--- [TEST] inventory.py is reloaded ---")
+
 from flask import Blueprint, request, jsonify, render_template, session
 import math, traceback
 from db import get_conn
