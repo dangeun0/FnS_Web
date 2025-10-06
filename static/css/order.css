@@ -130,4 +130,13 @@ body { background:#f9fafb; }
   }
 }
 
-
+/* ===== 강제 테이블 폭 유동화 ===== */
+#wrapper .table.wide-table,
+.table.wide-table,
+#orderTable {
+  width: 100% !important;
+  min-width: auto !important;
+  max-width: 100% !important;
+  table-layout: auto !important;
+  overflow-x: visible !important;
+}
