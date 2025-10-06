@@ -11,7 +11,7 @@ body { background:#f9fafb; }
 .toolbar { gap:.5rem; }
 .filter-toggle[aria-expanded="true"] .chev { transform:rotate(180deg); }
 .chev { transition:transform .2s ease; }
-.wide-table{ min-width: 2200px; }
+.wide-table {width: 100%; min-width: auto; table-layout: auto;}
 .sticky-col{ position:sticky; left:0; background:#fff; z-index:2; box-shadow: 2px 0 0 #f1f4f8; }
 .modal-xl { max-width: 1100px; }
 .modal-body { font-size: 0.9rem; }
