@@ -15,6 +15,16 @@ function toStatusClass(status) {
   return "status-" + key.replace(/\s+/g, "");
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yy}-${mm}-${dd}`;
+}
+
 // =================== 발주 리스트 ===================
 function initOrderList() {
   const orderTableBody = document.getElementById("orderTableBody");
@@ -30,27 +40,27 @@ function initOrderList() {
       orderTableBody.innerHTML = "";
 
       const headers = [
-        "관리번호","발주일자","진행상태","오더구분","사용처","발주처","제품군","소켓군","Ball type",
-        "품명1","품명2","수량","설계 시작","설계 종료","사급 1차","사급 2차","사급 3차",
-        "가공 1차","가공 최종","조립 시작","조립 종료","출고일자","비고"
+        "진행상태", "관리번호", "발주일자", "오더구분", "사용처", "발주처", "제품군", "소켓군", "Ball type",
+        "수량", "품명1", "품명2", "설계 시작", "설계 종료", "사급 1차", "사급 2차", "사급 3차",
+        "가공 1차", "가공 최종", "조립 시작", "조립 종료", "출고일자", "비고"
       ];
 
       data.forEach(row => {
         const tr = document.createElement("tr");
         const statusClass = toStatusClass(row.progress_status);
         const cells = [
-          `<strong>${row.manage_no}</strong>`,
-          row.order_date || '',
           `<span class="badge status-badge ${statusClass}">${row.progress_status || ''}</span>`,
+          `<strong>${row.manage_no}</strong>`,
+          formatDate(row.order_date),
           row.order_kind || '',
           row.usage_location || '',
           row.order_vendor || '',
           row.product_group || '',
           row.socket_group || '',
           row.ball_type || '',
+          `<strong>${(row.qty_total || 0).toLocaleString()}</strong>`,
           row.item_name1 || '',
           row.item_name2 || '',
-          (row.qty_total || 0).toLocaleString(),
           row.design_start || '',
           row.design_end || '',
           row.supply_in1 || '',
@@ -64,8 +74,12 @@ function initOrderList() {
           row.remarks || ''
         ];
 
-        // ✅ 각 셀 내용을 <span>으로 감싸서 카드형 표시 지원
         tr.innerHTML = cells.map((val, i) => `<td data-label='${headers[i]}'><span>${val}</span></td>`).join('');
+
+        // 진행상태 컬럼 고정
+        const firstTd = tr.querySelector('td');
+        if (firstTd) firstTd.classList.add('sticky-col');
+
         tr.addEventListener("click", () => window.location.href = `/order/detail/${row.manage_no}`);
         orderTableBody.appendChild(tr);
       });
@@ -115,7 +129,7 @@ async function initOrderDetail() {
       info.innerHTML = `
         <h5 class="card-title text-primary"><i class="bi bi-info-circle"></i> 발주 기본 정보</h5>
         <p>관리번호: <strong>${data.manage_no}</strong></p>
-        <p>발주일자: <strong>${data.order_date || ''}</strong></p>
+        <p>발주일자: <strong>${formatDate(data.order_date)}</strong></p>
         <p>진행상태: <span class="badge status-badge ${statusClass}">${data.progress_status || ''}</span>
            &nbsp;&nbsp; 고객사: <strong>${data.customer || ''}</strong></p>
         <p>제품군: <strong>${data.product_group || ''}</strong> &nbsp;&nbsp; 수량: <strong>${data.qty_total || 0}</strong></p>
