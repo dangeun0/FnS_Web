@@ -121,4 +121,120 @@ async function load(){
     tbody.appendChild(tr);
   });
 
-  document.getElementById('pageInfo').textContent = `페이지 ${json.page} / ${json.total_pages} · 총 ${
+  document.getElementById('pageInfo').textContent = `페이지 ${json.page} / ${json.total_pages} · 총 ${json.total_count}건`;
+  document.getElementById('status').textContent = '';
+  buildPager(json.page, json.total_pages);
+
+  applyVisibility(loadColPrefs());
+  showBusy(false);
+}
+
+// ===== Detail =====
+async function openDetail(code){
+  showBusy(true);
+  try{
+    const res = await fetch(`/inventory/item/${encodeURIComponent(code)}`, { credentials:'same-origin' });
+    const ct = (res.headers.get('content-type')||'').toLowerCase();
+    if(!ct.includes('application/json')){ location.href='/login'; return; }
+    const d = await res.json();
+    renderDetail(d);
+  }catch(e){ alert('상세 조회 실패'); }
+  finally{ showBusy(false); }
+}
+function renderDetail(d){
+  if(!d || !d.item_code){ alert('데이터 없음'); return; }
+  window.currentCode = d.item_code;
+  document.getElementById('dTitle').textContent = `${d.item_code} · ${d.item_name||''}`;
+  const g = document.getElementById('dGrid');
+  g.innerHTML = '';
+  const addKV = (k,v,id)=>{
+    const kdiv=document.createElement('div'); kdiv.textContent=k;
+    const vdiv=document.createElement('div'); vdiv.textContent=(v??'');
+    if(id) vdiv.id = id;
+    g.appendChild(kdiv); g.appendChild(vdiv);
+  };
+  addKV('분류', d.category_name);
+  addKV('제조사', d.maker_name);
+  addKV('규격', d.item_spec);
+  addKV('재질', d.material_name);
+  addKV('현재고', d.stock, 'dStock'); // ✅ 식별 가능한 현재고 DOM
+  addKV('위치', d.item_location);
+  if(d.item_note) addKV('비고', d.item_note);
+
+  const hist = d.history||[]; const tb = document.getElementById('dHist'); tb.innerHTML='';
+  hist.forEach(h=>{
+    const tr = document.createElement('tr');
+    const type = (h.inout_type||'').toUpperCase();
+    const label = type==='IN' ? '입고' : (type==='OUT' ? '출고' : type);
+    const cls = type==='IN' ? 'pill in' : (type==='OUT' ? 'pill out' : '');
+    tr.innerHTML = `<td>${h.trans_date? new Date(h.trans_date).toLocaleString():''}</td><td><span class="${cls}">${label}</span></td><td style="text-align:right">${h.qty??0}</td><td>${h.detail_note||''}</td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById('detailModal').classList.add('open');
+}
+
+// ===== Events =====
+document.getElementById('btnSearch').addEventListener('click', ()=>{ state.q=document.getElementById('q').value.trim(); state.page=1; load(); });
+document.getElementById('q').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ state.q=document.getElementById('q').value.trim(); state.page=1; load(); }});
+document.getElementById('perPage').addEventListener('change', (e)=>{ state.per_page=parseInt(e.target.value,10)||20; state.page=1; load(); });
+
+Array.from(document.querySelectorAll('th.sortable')).forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const col = th.getAttribute('data-col');
+    if(state.sort_col===col){ state.sort_dir = (state.sort_dir==='ASC'?'DESC':'ASC'); }
+    else { state.sort_col = col; state.sort_dir='ASC'; }
+    state.page = 1; load();
+  });
+});
+
+const btnLogout = document.getElementById('btnLogout');
+if(btnLogout){ btnLogout.addEventListener('click', ()=>{ if(confirm('로그아웃 하시겠습니까?')) location.href='/logout'; }); }
+
+const menuWrap = document.getElementById('colMenuWrap');
+document.getElementById('btnCols').addEventListener('click', ()=>{ menuWrap.classList.toggle('open'); });
+document.addEventListener('click', (e)=>{ if(!menuWrap.contains(e.target)) menuWrap.classList.remove('open'); });
+
+const dModal = document.getElementById('detailModal');
+document.getElementById('dClose').addEventListener('click', ()=> dModal.classList.remove('open'));
+dModal.addEventListener('click', (e)=>{ if(e.target===dModal) dModal.classList.remove('open'); });
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') dModal.classList.remove('open'); });
+
+window.addEventListener('DOMContentLoaded', ()=>{ buildColMenu(); applyVisibility(loadColPrefs()); readURL(); load(); });
+window.addEventListener('popstate', ()=>{ readURL(); load(); });
+
+// ===== 입/출고 처리 =====
+document.getElementById('txnConfirm').addEventListener('click', async ()=>{
+  const type = document.getElementById('txnType').value;
+  const qty = parseInt(document.getElementById('txnQty').value, 10);
+  const note = document.getElementById('txnNote').value.trim();
+  if(!window.currentCode){ alert('품목코드가 없습니다. 다시 시도하세요.'); return; }
+  if(!qty || qty <= 0){ alert('수량을 입력하세요'); return; }
+
+  try{
+    const res = await fetch('/inventory/txn', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ item_code: window.currentCode, inout_type:type, qty, note })
+    });
+    const j = await res.json();
+    if(!j.success){ alert(j.message || '처리 실패'); return; }
+
+    // 모달 현재고 반영
+    const dStock = document.getElementById('dStock');
+    if(dStock) dStock.textContent = j.new_stock;
+
+    // 리스트 행 현재고 즉시 반영
+    const row = document.querySelector(`tr[data-code="${window.currentCode}"] td.col-STOCK`);
+    if(row) row.textContent = j.new_stock;
+
+    // 이력 상단 추가
+    const tr = document.createElement('tr');
+    const _label = type==='IN' ? '입고' : '출고';
+    const _cls = type==='IN' ? 'pill in' : 'pill out';
+    tr.innerHTML = `<td>${new Date().toLocaleString()}</td><td><span class="${_cls}">${_label}</span></td><td style=\"text-align:right\">${qty}</td><td>${note||''}</td>`;
+    document.getElementById('dHist').prepend(tr);
+
+    // 입력 초기화
+    document.getElementById('txnQty').value='';
+    document.getElementById('txnNote').value='';
+  }catch(e){ alert('에러: '+e); }
+});
