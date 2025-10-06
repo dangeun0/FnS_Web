@@ -3,29 +3,58 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}재고 관리{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}">
-  {% block head %}{% endblock %}
+  <title>{% block title %}부품 관리 시스템{% endblock %}</title>
+  
+  {% block styles %}{% endblock %}
+
   <style>
-    .nav { display:flex; gap:16px; }
-    .nav-link { text-decoration:none; color:var(--text); font-weight:500; }
-    .nav-link:hover { color:var(--pri); }
+    :root { --bg:#f7f9fc; --card:#fff; --text:#223; --muted:#667; --pri:#2f6feb; --bd:#e3e7f0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: var(--text); }
+    header {
+      position: sticky; top: 0; background: var(--bg); z-index: 10;
+      display: flex; gap: 24px; align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--bd);
+    }
+    .brand { font-weight: 700; font-size: 1.1rem; text-decoration: none; color: var(--text); }
+    .nav { display: flex; gap: 20px; }
+    .nav-link { text-decoration: none; color: var(--muted); font-weight: 500; font-size: 0.95rem; }
+    .nav-link:hover { color: var(--pri); }
+    .user-info { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
+    .wrap { max-width: 1600px; margin: 0 auto; padding: 24px; }
+    button { cursor: pointer; }
   </style>
 </head>
 <body>
   <header>
-    <div class="brand">부품 관리</div>
+    <a href="{{ url_for('inventory.page') }}" class="brand">부품 관리 시스템</a>
+    
     <nav class="nav">
-      <a href="/inventory" class="nav-link">재고 목록</a>
-      <a href="/inventory/txn_history" class="nav-link">입출고 이력</a>
+      <a href="{{ url_for('inventory.page') }}" class="nav-link">재고 관리</a>
+      <a href="{{ url_for('order.order_list') }}" class="nav-link">발주 관리</a>
     </nav>
-    <button id="btnLogout" title="로그아웃" style="margin-left:auto">로그아웃</button>
+
+    <div class="user-info">
+      <span>{{ session.get('user_name', '사용자') }}님</span>
+      <button id="btnLogout" title="로그아웃" style="border:1px solid var(--bd); background:#fff; border-radius:8px; padding: 6px 10px;">로그아웃</button>
+    </div>
   </header>
 
   <div class="wrap">
     {% block content %}{% endblock %}
   </div>
 
+  <script>
+    const btnLogout = document.getElementById('btnLogout');
+    if(btnLogout) {
+      btnLogout.addEventListener('click', () => {
+        if(confirm('로그아웃 하시겠습니까?')) {
+          location.href = "{{ url_for('auth.logout') }}";
+        }
+      });
+    }
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

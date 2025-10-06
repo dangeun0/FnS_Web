@@ -1,27 +1,60 @@
-# app.py (메인) — 모듈화 적용 버전
+# -*- coding: utf-8 -*-
+from flask import Blueprint, render_template, request, redirect, url_for, session
+from functools import wraps
+import traceback
+from db import get_conn
 
-from flask import Flask, render_template, redirect, url_for
-from auth import auth_bp, login_required
-from inventory import inventory_bp
-# ✅ 신규 추가: 발주 관리 모듈
-# 기존 구조 변경 최소화, 신규 모듈 연결을 위해 import
-from order import order_bp
+auth_bp = Blueprint('auth', __name__)
 
-app = Flask(__name__, template_folder="templates")
-app.config["SECRET_KEY"] = "CHANGE_ME_TO_RANDOM_SECRET"  # TODO: 보안 키 설정 필수
+def login_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not session.get('user_id'):
+            return redirect(url_for('auth.login', next=request.path))
+        return fn(*args, **kwargs)
+    return wrapper
 
-# 블루프린트 등록
-app.register_blueprint(auth_bp)
-app.register_blueprint(inventory_bp)
-# ✅ 신규 추가: 발주 관리 블루프린트 등록
-# 이유: 발주 관리 Web 접근을 위해 필요
-app.register_blueprint(order_bp)
+@auth_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
 
-@app.route("/")
+    user_id = (request.form.get('id') or '').strip()
+    pw = (request.form.get('password') or '').strip()
+    if not user_id or not pw:
+        return render_template('login.html', error='ID/PW를 입력하세요.'), 400
+
+    try:
+        with get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                SELECT ID, NAME, ROLE_LEVEL
+                  FROM MEMBERS
+                 WHERE UPPER(ID) = UPPER(:1)
+                   AND TRIM(PASSWORD) = :2
+                """,
+                [user_id, pw]
+            )
+            row = cur.fetchone()
+            if not row:
+                return render_template('login.html', error='계정 정보가 올바르지 않습니다.'), 401
+
+            cur.execute(
+                "UPDATE MEMBERS SET LAST_DATE = SYSTIMESTAMP WHERE UPPER(ID) = UPPER(:1)",
+                [user_id]
+            )
+            conn.commit()
+
+            session['user_id'], session['user_name'], session['user_level'] = row[0], row[1], row[2]
+    except Exception:
+        return render_template('login.html', error=traceback.format_exc()), 500
+
+    # [변경] 성공 시 특정 페이지가 아닌, 앱의 기본 경로('/')로 이동
+    return redirect(url_for('home'))
+
+@auth_bp.route('/logout')
 @login_required
-def home():
-    # 로그인 성공 시 항상 재고 리스트 페이지로 이동
-    return redirect(url_for("inventory.page"))
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+def logout():
+    session.clear()
+    return redirect(url_for('auth.login'))

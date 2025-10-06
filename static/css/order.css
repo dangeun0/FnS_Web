@@ -1,20 +1,14 @@
 /* ====== 공통 기본 ====== */
-body { background:#f9fafb; }
-.navbar-brand { font-weight:700; color:#0056b3 !important; }
 .page-card, .section-card { border-radius:1rem; box-shadow:0 2px 6px rgba(0,0,0,.08); }
 .filter-row .form-label { font-size:.85rem; color:#6c757d; }
 .table-card { border-radius:1rem; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,.08); }
-#orderTable th, #orderTable td { white-space: nowrap; }
+#orderTable th, #orderTable td { white-space: nowrap; padding: 0.5rem 0.75rem; }
 #orderTable th { background:#f1f4f8; font-weight:600; }
-#orderTable tbody tr:hover { background:#f6f9ff; }
+#orderTable tbody tr:hover { background:#f6f9ff; cursor: pointer; }
 .nowrap { white-space:nowrap; }
-.toolbar { gap:.5rem; }
 .filter-toggle[aria-expanded="true"] .chev { transform:rotate(180deg); }
 .chev { transition:transform .2s ease; }
-.wide-table {width: 100%; min-width: auto; table-layout: auto;}
-.sticky-col{ position:sticky; left:0; background:#fff; z-index:2; box-shadow: 2px 0 0 #f1f4f8; }
-.modal-xl { max-width: 1100px; }
-.modal-body { font-size: 0.9rem; }
+.sticky-col{ position:sticky; left:0; background: inherit; z-index:2; box-shadow: 2px 0 0 #f1f4f8; }
 
 /* ====== 공정별 색상 (통일) ====== */
 .design-color { color:#0d6efd; font-weight:bold; }
@@ -23,13 +17,13 @@ body { background:#f9fafb; }
 .assembly-color { color:#fd7e14; font-weight:bold; }
 .delivery-color { color:#dc3545; font-weight:bold; }
 
-/* 리스트 상태 배지 색상도 동일 팔레트 사용 */
-.status-badge { font-weight:600; color:#fff; }
-.status-설계 { background:#0d6efd; }
-.status-사급 { background:#6f42c1; }
-.status-가공 { background:#198754; }
-.status-조립 { background:#fd7e14; }
-.status-납품 { background:#dc3545; }
+/* 리스트 상태 배지 색상 */
+.status-badge { font-weight:600; }
+.status-설계 { background-color:#0d6efd; }
+.status-사급 { background-color:#6f42c1; }
+.status-가공 { background-color:#198754; }
+.status-조립 { background-color:#fd7e14; }
+.status-납품 { background-color:#dc3545; }
 
 /* ====== 타임라인/카드 ====== */
 .timeline-step { margin-bottom:1.5rem; border:2px solid; border-radius:0.5rem; padding:1rem; background:#fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
@@ -38,110 +32,30 @@ body { background:#f9fafb; }
 .timeline-step.pending { border-color:#0d6efd; }
 .section-card.delivery-highlight { border:2px solid #dc3545; background-color:#fdeaea; }
 
-/* ====================== 강제 적용 반응형 카드 리스트 ====================== */
+/* ====================== 반응형 카드 리스트 ====================== */
 @media (max-width: 768px) {
-  #orderTable,
-  #orderTable thead,
-  #orderTable tbody,
-  #orderTable th,
-  #orderTable td,
-  #orderTable tr {
-    display: block !important;
-    width: 100% !important;
-  }
-
-  #orderTable thead {
-    display: none !important;
-  }
-
+  #orderTable thead { display: none; }
+  #orderTable, #orderTable tbody, #orderTable tr, #orderTable td { display: block; width: 100%; }
   #orderTable tr {
     margin-bottom: 1rem;
     border: 1px solid #dee2e6;
     border-radius: 0.75rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    background-color: #fff;
-    padding: 0.75rem;
-  }
-
-  #orderTable td {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-    padding: 0.4rem 0.75rem !important;
-    border: none !important;
-    font-size: 0.9rem !important;
-    word-break: break-word !important;
-  }
-
-  #orderTable td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #495057;
-    flex: 0 0 40%;
-    max-width: 40%;
-  }
-
-  #orderTable td span {
-    display: inline-block;
-    max-width: 58%;
-    text-align: right;
-    color: #212529;
-    overflow-wrap: break-word;
-  }
-
-  .sticky-col {
-    position: static !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-}
-
-@media (max-width: 768px) {
-  table#orderTable td {
-    display: block !important;
-    padding: 0.4rem 0.75rem !important;
-    border: none !important;
-    font-size: 0.9rem !important;
-    word-break: break-word !important;
-  }
-
-  table#orderTable td::before {
-    content: attr(data-label);
-    display: block;
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 0.25rem;
-  }
-
-  table#orderTable td span {
-    display: block;
-    color: #212529;
-    text-align: left;
-    padding-left: 0.25rem;
-  }
-
-  table#orderTable tr {
-    margin-bottom: 1rem;
-    border: 1px solid #dee2e6;
-    border-radius: 0.75rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    background-color: #fff;
     padding: 0.5rem;
   }
-}
-
-/* ===== 강제 테이블 폭 유동화 ===== */
-#wrapper .table.wide-table,
-.table.wide-table,
-#orderTable {
-  width: 100% !important;
-  min-width: auto !important;
-  max-width: 100% !important;
-  table-layout: auto !important;
-  overflow-x: visible !important;
-}
-
-.table-card {
-  max-width: none !important;
-  width: 100% !important;
+  #orderTable td {
+    padding: 0.4rem 0.75rem;
+    border: none;
+    display: block;
+    text-align: right;
+  }
+  #orderTable td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: 600;
+    color: #495057;
+  }
+  .sticky-col {
+    position: static;
+    box-shadow: none;
+  }
 }
