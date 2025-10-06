@@ -40,8 +40,8 @@ function initOrderList() {
       orderTableBody.innerHTML = "";
 
       const headers = [
-        "진행상태", "관리번호", "발주일자", "오더구분", "사용처", "발주처", "제품군", "소켓군", "Ball type",
-        "수량", "품명1", "품명2", "설계 시작", "설계 종료", "사급 1차", "사급 2차", "사급 3차",
+        "진행상태", "관리번호", "오더구분", "사용처", "발주처", "제품군", "소켓군", "Ball type",
+        "수량", "품명1", "품명2", "발주일자", "설계 시작", "설계 종료", "사급 1차", "사급 2차", "사급 3차",
         "가공 1차", "가공 최종", "조립 시작", "조립 종료", "출고일자", "비고"
       ];
 
@@ -51,7 +51,6 @@ function initOrderList() {
         const cells = [
           `<span class="badge status-badge ${statusClass}">${row.progress_status || ''}</span>`,
           `<strong>${row.manage_no}</strong>`,
-          formatDate(row.order_date),
           row.order_kind || '',
           row.usage_location || '',
           row.order_vendor || '',
@@ -61,6 +60,7 @@ function initOrderList() {
           `<strong>${(row.qty_total || 0).toLocaleString()}</strong>`,
           row.item_name1 || '',
           row.item_name2 || '',
+          formatDate(row.order_date),          // ✅ 발주일자 위치 이동
           row.design_start || '',
           row.design_end || '',
           row.supply_in1 || '',
@@ -73,6 +73,7 @@ function initOrderList() {
           row.ship_date || '',
           row.remarks || ''
         ];
+
 
         tr.innerHTML = cells.map((val, i) => `<td data-label='${headers[i]}'><span>${val}</span></td>`).join('');
 
