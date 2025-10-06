@@ -1,9 +1,6 @@
-// [최종 수정] static/js/inventory.js
-
 // ===== State & Helpers =====
 let state = { page:1, per_page:20, sort_col:'STOCK', sort_dir:'DESC', q:'' };
 const $ = (s)=>document.querySelector(s);
-// ✅ [제거] const tbody = document.querySelector('#grid tbody'); -> 타이밍 문제의 원인이므로 load() 함수 내부로 이동합니다.
 const spinner = document.getElementById('spinner');
 
 const COLUMNS = [
@@ -86,7 +83,6 @@ function buildPager(curr, total){
 
 // ===== Data Load =====
 async function load(){
-  // ✅ [수정] tbody 변수를 DOM이 확실히 로드된 후인 load() 함수 내에서 찾도록 변경
   const tbody = document.querySelector('#grid tbody');
   if (!tbody) {
     console.error("Critical error: #grid tbody element not found.");
@@ -97,7 +93,8 @@ async function load(){
   writeURL(true);
   const params = new URLSearchParams(state);
   let res;
-  try{ res = await fetch(`/inventory?${params.toString()}`, { credentials:'same-origin' }); }
+  // [수정] API 호출 경로를 '/inventory/'로 변경
+  try{ res = await fetch(`/inventory/?${params.toString()}`, { credentials:'same-origin' }); }
   catch(err){ showBusy(false); alert('네트워크 오류'); return; }
   const ct = (res.headers.get('content-type')||'').toLowerCase();
   if(!ct.includes('application/json')){ location.href='/login'; return; }
@@ -195,7 +192,7 @@ document.getElementById('btnCols').addEventListener('click', ()=>{ menuWrap.clas
 document.addEventListener('click', (e)=>{ if(!menuWrap.contains(e.target)) menuWrap.classList.remove('open'); });
 
 const dModal = document.getElementById('detailModal');
-document.getElementById('dClose').addEventListener('click', ()=> dModal.classList.remove('open'));
+document.getElementById('dClose').addEventListener('click', ()=> dModal.classList.remove('open'); });
 dModal.addEventListener('click', (e)=>{ if(e.target===dModal) dModal.classList.remove('open'); });
 window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') dModal.classList.remove('open'); });
 
