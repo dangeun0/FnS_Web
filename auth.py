@@ -6,7 +6,6 @@ from db import get_conn
 
 auth_bp = Blueprint('auth', __name__)
 
-# 로그인 보호 데코레이터
 def login_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
@@ -51,8 +50,8 @@ def login():
     except Exception:
         return render_template('login.html', error=traceback.format_exc()), 500
 
-    # ✅ 성공 시 항상 재고 페이지로 이동
-    return redirect(url_for('inventory.page'))
+    # [변경] 성공 시 특정 페이지가 아닌, 앱의 기본 경로('/')로 이동
+    return redirect(url_for('home'))
 
 @auth_bp.route('/logout')
 @login_required
