@@ -1,9 +1,9 @@
-// [수정] static/js/inventory.js
+// [최종 수정] static/js/inventory.js
 
 // ===== State & Helpers =====
 let state = { page:1, per_page:20, sort_col:'STOCK', sort_dir:'DESC', q:'' };
 const $ = (s)=>document.querySelector(s);
-// ✅ [제거] const tbody = document.querySelector('#grid tbody'); -> 타이밍 문제 해결을 위해 load() 함수 내부로 이동
+// ✅ [제거] const tbody = document.querySelector('#grid tbody'); -> 타이밍 문제의 원인이므로 load() 함수 내부로 이동합니다.
 const spinner = document.getElementById('spinner');
 
 const COLUMNS = [
@@ -37,7 +37,7 @@ function loadColPrefs(){ try{ return JSON.parse(localStorage.getItem('inv_cols')
 function saveColPrefs(prefs){ localStorage.setItem('inv_cols', JSON.stringify(prefs)); }
 function applyVisibility(prefs){
   COLUMNS.forEach(c=>{
-    const on = prefs[c.key] !== false; // default: visible
+    const on = prefs[c.key] !== false;
     const th = document.querySelector(`th.col-${c.key}`);
     if(th) th.classList.toggle('hide', !on);
     document.querySelectorAll(`td.col-${c.key}`).forEach(td=> td.classList.toggle('hide', !on));
@@ -90,7 +90,7 @@ async function load(){
   const tbody = document.querySelector('#grid tbody');
   if (!tbody) {
     console.error("Critical error: #grid tbody element not found.");
-    return; // tbody가 없으면 함수를 더 이상 진행하지 않음
+    return;
   }
 
   showBusy(true);
