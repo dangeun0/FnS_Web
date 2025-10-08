@@ -99,6 +99,11 @@ def insert_to_db(df, start, end):
                 "REMARKS": r.get(COL_MAP["REMARKS"])
             }
 
+            # NaN → None 자동 변환
+            for k, v in vals.items():
+                if isinstance(v, float) and pd.isna(v):
+                    vals[k] = None
+
             sql_orders = """
                 INSERT INTO ORDERS (
                     ORDER_NO, ORDER_DATE, ORDER_STATUS, ORDER_KIND,
@@ -106,13 +111,12 @@ def insert_to_db(df, start, end):
                     BALL_TYPE, ITEM_NAME1, ITEM_NAME2, QTY_TOTAL, REMARKS
                 ) VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)
             """
-            try:
-                cur.execute(sql_orders, (
-                    order_no, vals["ORDER_DATE"], vals["ORDER_STATUS"], vals["ORDER_KIND"],
-                    vals["CUSTOMER_NAME"], vals["PRODUCT_GROUP"], vals["SOCKET_GROUP"],
-                    vals["BALL_TYPE"], vals["ITEM_NAME1"], vals["ITEM_NAME2"],
-                    vals["QTY_TOTAL"], vals["REMARKS"]
-                ))
+            cur.execute(sql_orders, (
+                order_no, vals["ORDER_DATE"], vals["ORDER_STATUS"], vals["ORDER_KIND"],
+                vals["CUSTOMER_NAME"], vals["PRODUCT_GROUP"], vals["SOCKET_GROUP"],
+                vals["BALL_TYPE"], vals["ITEM_NAME1"], vals["ITEM_NAME2"],
+                vals["QTY_TOTAL"], vals["REMARKS"]
+            ))
             except Exception as e:
                 print("\n[❌ SQL 오류 발생]")
                 print("쿼리문:\n", sql_orders)
