@@ -1,7 +1,7 @@
 // ===== State & Helpers =====
 let state = { page:1, per_page:20, sort_col:'STOCK', sort_dir:'DESC', q:'' };
 const $ = (s)=>document.querySelector(s);
-const tbody = document.querySelector('#grid tbody');
+//const tbody = document.querySelector('#grid tbody');
 const spinner = document.getElementById('spinner');
 
 const COLUMNS = [
@@ -84,6 +84,13 @@ function buildPager(curr, total){
 
 // ===== Data Load =====
 async function load(){
+  // 이 위치에 위에서 삭제한 라인을 추가합니다.
+  const tbody = document.querySelector('#grid tbody');
+  if (!tbody) {
+    console.error("Critical error: #grid tbody element not found.");
+    return;
+  }
+  
   showBusy(true);
   writeURL(true);
   const params = new URLSearchParams(state);
