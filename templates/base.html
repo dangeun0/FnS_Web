@@ -1,4 +1,4 @@
-<!--<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
@@ -7,7 +7,7 @@
   
   {% block styles %}{% endblock %}
 
-  <style>
+<!--  <style>
     :root { --bg:#f7f9fc; --card:#fff; --text:#223; --muted:#667; --pri:#2f6feb; --bd:#e3e7f0; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: var(--text); }
@@ -24,7 +24,7 @@
     .user-info { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
     .wrap { max-width: 1600px; margin: 0 auto; padding: 24px; }
     button { cursor: pointer; }
-  </style>
+  </style>-->
 </head>
 <body>
   <header>
@@ -55,38 +55,6 @@
       });
     }
   </script>
-  {% block scripts %}{% endblock %}
-</body>
-</html>-->
-
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}재고 관리{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}">
-  {% block head %}{% endblock %}
-  <style>
-    .nav { display:flex; gap:16px; }
-    .nav-link { text-decoration:none; color:var(--text); font-weight:500; }
-    .nav-link:hover { color:var(--pri); }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="brand">부품 관리</div>
-    <nav class="nav">
-      <a href="/inventory" class="nav-link">재고 목록</a>
-      <a href="/inventory/txn_history" class="nav-link">입출고 이력</a>
-    </nav>
-    <button id="btnLogout" title="로그아웃" style="margin-left:auto">로그아웃</button>
-  </header>
-
-  <div class="wrap">
-    {% block content %}{% endblock %}
-  </div>
-
   {% block scripts %}{% endblock %}
 </body>
 </html>
