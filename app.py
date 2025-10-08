@@ -1,5 +1,5 @@
 # app.py (메인) — 모듈화 적용 버전
-
+import os
 from flask import Flask, render_template, redirect, url_for
 from auth import auth_bp, login_required
 from inventory import inventory_bp
@@ -7,7 +7,12 @@ from inventory import inventory_bp
 # 기존 구조 변경 최소화, 신규 모듈 연결을 위해 import
 from order import order_bp
 
-app = Flask(__name__, template_folder="templates")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_FOLDER_PATH = os.path.join(BASE_DIR, 'static')
+app = Flask(__name__, template_folder="templates", static_folder=STATIC_FOLDER_PATH)
+
+# app = Flask(__name__, template_folder="templates")
+
 app.config["SECRET_KEY"] = "CHANGE_ME_TO_RANDOM_SECRET"  # TODO: 보안 키 설정 필수
 
 # 블루프린트 등록
