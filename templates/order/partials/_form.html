@@ -8,24 +8,24 @@
       <div class="modal-body">
         <form id="orderForm" class="row g-3">
           <div class="col-md-6">
-            <label class="form-label">관리번호</label>
-            <input type="text" name="manage_no" class="form-control" placeholder="예) 0P8255A-2412-14" required>
+            <label for="new_data_no" class="form-label">관리번호</label>
+            <input type="text" name="manage_no" id="new_data_no" class="form-control" placeholder="예) 0P8255A-2412-14" required>
           </div>
           <div class="col-md-6">
-            <label class="form-label">발주일자</label>
-            <input type="date" name="order_date" class="form-control" required>
+            <label for="new_data_date" class="form-label">발주일자</label>
+            <input type="date" name="order_date" id="new_data_date" class="form-control" required>
           </div>
           <div class="col-md-6">
-            <label class="form-label">고객사</label>
-            <input type="text" name="customer" class="form-control" placeholder="예) 삼성">
+            <label for="new_data_customer" class="form-label">고객사</label>
+            <input type="text" name="customer" id="new_data_customer" class="form-control" placeholder="예) 삼성">
           </div>
           <div class="col-md-6">
-            <label class="form-label">제품군</label>
-            <input type="text" name="product_group" class="form-control" placeholder="예) Simple">
+            <label for="new_data_product" class="form-label">제품군</label>
+            <input type="text" name="product_group" id="new_data_product" class="form-control" placeholder="예) Simple">
           </div>
           <div class="col-md-6">
-            <label class="form-label">진행상태</label>
-            <select name="progress_status" class="form-select">
+            <label for="new_data_status" class="form-label">진행상태</label>
+            <select name="progress_status" id="new_data_status" class="form-select">
               <option value="">선택</option>
               <option>설계</option>
               <option>사급</option>
@@ -35,12 +35,12 @@
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label">수량</label>
-            <input type="number" name="qty" class="form-control" min="0" step="1">
+            <label for="new_data_qty" class="form-label">수량</label>
+            <input type="number" name="qty" id="new_data_qty" class="form-control" min="0" step="1">
           </div>
           <div class="col-md-12">
-            <label class="form-label">비고</label>
-            <textarea name="remarks" class="form-control" rows="3" placeholder="특이사항을 입력하세요"></textarea>
+            <label for="new_data_remarks" class="form-label">비고</label>
+            <textarea name="remarks" id="new_data_remarks" class="form-control" rows="3" placeholder="특이사항을 입력하세요"></textarea>
           </div>
         </form>
       </div>
