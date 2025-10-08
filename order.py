@@ -3,6 +3,15 @@ from db import get_conn
 
 order_bp = Blueprint('order', __name__, url_prefix='/order')
 
+# [추가] 페이징 파라미터 처리를 위한 헬퍼 함수
+def _parse_int(v, default, lo, hi):
+    try:
+        x = int(v)
+        return max(lo, min(x, hi))
+    except (ValueError, TypeError):
+        return default
+
+
 # 발주 리스트 페이지
 defined_columns = [
     "MANAGE_NO", "ORDER_DATE", "PROGRESS_STATUS", "ORDER_KIND", "USAGE_LOCATION",
@@ -15,6 +24,10 @@ defined_columns = [
 @order_bp.route('/list')
 def order_list():
     return render_template('order/order_list.html')
+
+@order_bp.route('/detail/<manage_no>')
+def order_detail_page(manage_no):
+    return render_template('order/order_detail.html', manage_no=manage_no)
 
 # -------------------------------
 # 내부 유틸 (프런트 호환용 키 매핑)
@@ -75,22 +88,54 @@ def _map_detail_row(o: dict) -> dict:
 
 @order_bp.route('/api/orders')
 def api_orders():
-    """
-    [수정] 안정화 1단계
-    - DB 연결을 컨텍스트 매니저로 변경 (자원 누수 방지)
-    - 컬럼명을 프런트 기대 키로 변환하여 반환 (프런트 변경 최소화)
-    """
     try:
-        # [수정] get_conn() 컨텍스트 매니저 사용
+        page = _parse_int(request.args.get('page', 1), 1, 1, 10**9)
+        per_page = _parse_int(request.args.get('per_page', 20), 20, 1, 200)
+        
+        offset = (page - 1) * per_page
+        
         with get_conn() as conn:
             cur = conn.cursor()
-            cur.execute("SELECT * FROM VW_ORDERS_SUMMARY ORDER BY ORDER_DATE DESC")
+            
+            # 검색 조건은 현재 URL 파라미터를 그대로 사용
+            where_clauses = []
+            binds = {}
+            for key, value in request.args.items():
+                if key not in ['page', 'per_page'] and value:
+                    # 예시: customer_name 검색
+                    if key == 'customer':
+                        where_clauses.append("UPPER(CUSTOMER_NAME) LIKE UPPER(:customer)")
+                        binds['customer'] = f"%{value}%"
+                    # TODO: 다른 검색 필드 추가
+            
+            where_sql = ""
+            if where_clauses:
+                where_sql = "WHERE " + " AND ".join(where_clauses)
+
+            cur.execute(f"SELECT COUNT(*) FROM VW_ORDERS_SUMMARY {where_sql}", binds)
+            total_count = cur.fetchone()[0]
+
+            sql = f"""
+                SELECT * FROM VW_ORDERS_SUMMARY
+                {where_sql}
+                ORDER BY ORDER_DATE DESC
+                OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY
+            """
+            cur.execute(sql, {**binds, 'offset': offset, 'limit': per_page})
+            
             cols = [d[0].lower() for d in cur.description]
             rows = [dict(zip(cols, r)) for r in cur.fetchall()]
-        # [추가] 키 매핑
-        return jsonify([_map_summary_row(r) for r in rows])
+
+        return jsonify({
+            'data': [_map_summary_row(r) for r in rows],
+            'total_count': total_count,
+            'page': page,
+            'per_page': per_page,
+            'total_pages': math.ceil(total_count / per_page) if per_page > 0 else 0
+        })
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
 @order_bp.route('/api/order/<manage_no>')
 def api_order_detail(manage_no):
