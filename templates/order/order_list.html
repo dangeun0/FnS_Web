@@ -29,20 +29,20 @@
           <input type="date" class="form-control" id="filter_date_start" name="order_date_start" />
         </div>
         <div class="col-md-3">
-          <label class="form-label">발주일자(종료)</label>
-          <input type="date" class="form-control" name="order_date_end" />
+          <label for="filter_date_end" class="form-label">발주일자(종료)</label>
+          <input type="date" class="form-control" id="filter_date_end" name="order_date_end" />
         </div>
         <div class="col-md-3">
-          <label class="form-label">고객사</label>
-          <input type="text" class="form-control" name="customer" placeholder="예) 삼성" />
+          <label for="filter_customer" class="form-label">고객사</label>
+          <input type="text" class="form-control" id="filter_customer" name="customer" placeholder="예) 삼성" />
         </div>
         <div class="col-md-3">
-          <label class="form-label">제품군</label>
-          <input type="text" class="form-control" name="product_group" placeholder="예) Simple" />
+          <label for="filter_product_group" class="form-label">제품군</label>
+          <input type="text" class="form-control" id="filter_product_group" name="product_group" placeholder="예) Simple" />
         </div>
         <div class="col-md-3">
-          <label class="form-label">진행상태</label>
-          <select class="form-select" name="progress_status">
+          <label for="filter_status" class="form-label">진행상태</label>
+          <select class="form-select" id="filter_status" name="progress_status">
             <option value="">전체</option>
             <option>설계</option>
             <option>사급</option>
@@ -52,8 +52,8 @@
           </select>
         </div>
         <div class="col-md-3">
-          <label class="form-label">관리번호</label>
-          <input type="text" class="form-control" name="manage_no" placeholder="예) 0P8255A-2412-14" />
+          <label for="filter_manage_no" class="form-label">관리번호</label>
+          <input type="text" class="form-control" id="filter_manage_no" name="manage_no" placeholder="예) 0P8255A-2412-14" />
         </div>
         <div class="col-12 d-flex justify-content-end gap-2">
           <button type="reset" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> 초기화</button>
