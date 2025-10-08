@@ -106,12 +106,33 @@ def insert_to_db(df, start, end):
                     BALL_TYPE, ITEM_NAME1, ITEM_NAME2, QTY_TOTAL, REMARKS
                 ) VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)
             """
-            cur.execute(sql_orders, (
-                order_no, vals["ORDER_DATE"], vals["ORDER_STATUS"], vals["ORDER_KIND"],
-                vals["CUSTOMER_NAME"], vals["PRODUCT_GROUP"], vals["SOCKET_GROUP"],
-                vals["BALL_TYPE"], vals["ITEM_NAME1"], vals["ITEM_NAME2"],
-                vals["QTY_TOTAL"], vals["REMARKS"]
-            ))
+            try:
+                cur.execute(sql_orders, (
+                    order_no, vals["ORDER_DATE"], vals["ORDER_STATUS"], vals["ORDER_KIND"],
+                    vals["CUSTOMER_NAME"], vals["PRODUCT_GROUP"], vals["SOCKET_GROUP"],
+                    vals["BALL_TYPE"], vals["ITEM_NAME1"], vals["ITEM_NAME2"],
+                    vals["QTY_TOTAL"], vals["REMARKS"]
+                ))
+            except Exception as e:
+                print("\n[❌ SQL 오류 발생]")
+                print("쿼리문:\n", sql_orders)
+                print("바인딩 값:")
+                print({
+                    "ORDER_NO": order_no,
+                    "ORDER_DATE": vals["ORDER_DATE"],
+                    "ORDER_STATUS": vals["ORDER_STATUS"],
+                    "ORDER_KIND": vals["ORDER_KIND"],
+                    "CUSTOMER_NAME": vals["CUSTOMER_NAME"],
+                    "PRODUCT_GROUP": vals["PRODUCT_GROUP"],
+                    "SOCKET_GROUP": vals["SOCKET_GROUP"],
+                    "BALL_TYPE": vals["BALL_TYPE"],
+                    "ITEM_NAME1": vals["ITEM_NAME1"],
+                    "ITEM_NAME2": vals["ITEM_NAME2"],
+                    "QTY_TOTAL": vals["QTY_TOTAL"],
+                    "REMARKS": vals["REMARKS"]
+                })
+                print("오류 메시지:", e)
+                raise   
 
             # ORDER_PROCESSING
             due = as_date(r.get(COL_MAP["PROC_DUE"]))
