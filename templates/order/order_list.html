@@ -49,11 +49,12 @@
             <option>가공</option>
             <option>조립</option>
             <option>납품</option>
+            <option>완료</option>
           </select>
         </div>
         <div class="col-md-3">
           <label class="form-label">관리번호</label>
-          <input type="text" class="form-control" name="manage_no" placeholder="예) 0P8255A-2412-14" />
+          <input type="text" class="form-control" name="manage_no" placeholder="예) SAMPLE-251009-001" />
         </div>
         <div class="col-12 d-flex justify-content-end gap-2">
           <button type="reset" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> 초기화</button>
@@ -67,36 +68,28 @@
       <table class="table table-hover mb-0 align-middle" id="orderTable">
         <thead>
           <tr>
-            <th class="nowrap sticky-col">진행상태</th>
-            <th>관리번호</th>
-            <th>오더구분</th>
-            <th>사용처</th>
-            <th>발주처</th>
-            <th>제품군</th>
-            <th>소켓군</th>
-            <th>Ball type</th>
-            <th class="text-end">수량</th>
-            <th>품명1</th>
-            <th>품명2</th>
-            <th>발주일자</th>
-            <th>설계 시작</th>
-            <th>설계 종료</th>
-            <th>사급 1차</th>
-            <th>사급 2차</th>
-            <th>사급 3차</th>
-            <th>가공 1차</th>
-            <th>가공 최종</th>
-            <th>조립 시작</th>
-            <th>조립 종료</th>
-            <th>출고일자</th>
-            <th>비고</th>
+            <th class="nowrap sticky-col">관리번호</th>
+            <th class="nowrap">고객사</th>
+            <th class="nowrap">제품군</th>
+            <th class="nowrap text-end">수량</th>
+            <th class="nowrap">진행상태</th>
+            <th class="nowrap">오더구분</th>
+            <th class="nowrap">사용처</th>
+            <th class="nowrap">품명1</th>
+            <th class="nowrap">품명2</th>
+            <th class="nowrap">발주일자</th>
+            <th class="nowrap">설계 시작</th>
+            <th class="nowrap">설계 종료</th>
+            <th class="nowrap">출고일자</th>
+            <th class="nowrap">비고</th>
           </tr>
         </thead>
-        <tbody id="orderTableBody">
-            <tr><td colspan="23" style="text-align: center; padding: 40px;">아직 생성한 항목이 없습니다.</td></tr>
-        </tbody>
+        <tbody id="orderTableBody"></tbody>
       </table>
-    <div class="p-2 small text-muted" id="tableInfo">총 0건</div>
+      
+      <div class="d-flex justify-content-center py-3" id="pager"></div>
+
+    <div class="p-2 small text-muted border-top" id="tableInfo">총 0건</div>
   </div>
 </div>
 {% endblock %}
