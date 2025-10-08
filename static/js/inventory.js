@@ -1,4 +1,4 @@
-alert("--- inventory.js SCRIPT LOADED! ---");
+// alert("--- inventory.js SCRIPT LOADED! ---");
 // ===== State & Helpers =====
 let state = { page:1, per_page:20, sort_col:'STOCK', sort_dir:'DESC', q:'' };
 const $ = (s)=>document.querySelector(s);
