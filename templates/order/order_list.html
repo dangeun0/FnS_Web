@@ -24,42 +24,7 @@
   <div id="filterArea" class="collapse">
     <div class="page-card bg-white p-3 mb-3">
       <form class="row g-3 filter-row" id="searchForm">
-        <div class="col-md-3">
-          <label class="form-label">발주일자(시작)</label>
-          <input type="date" class="form-control" name="order_date_start" />
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">발주일자(종료)</label>
-          <input type="date" class="form-control" name="order_date_end" />
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">고객사</label>
-          <input type="text" class="form-control" name="customer" placeholder="예) 삼성" />
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">제품군</label>
-          <input type="text" class="form-control" name="product_group" placeholder="예) Simple" />
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">진행상태</label>
-          <select class="form-select" name="progress_status">
-            <option value="">전체</option>
-            <option>설계</option>
-            <option>사급</option>
-            <option>가공</option>
-            <option>조립</option>
-            <option>납품</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">관리번호</label>
-          <input type="text" class="form-control" name="manage_no" placeholder="예) 0P8255A-2412-14" />
-        </div>
-        <div class="col-12 d-flex justify-content-end gap-2">
-          <button type="reset" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> 초기화</button>
-          <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> 검색</button>
-        </div>
-      </form>
+        </form>
     </div>
   </div>
 
@@ -92,11 +57,12 @@
             <th>비고</th>
           </tr>
         </thead>
-        <tbody id="orderTableBody">
-            <tr><td colspan="23" style="text-align: center; padding: 40px;">아직 생성한 항목이 없습니다.</td></tr>
-        </tbody>
+        <tbody id="orderTableBody"></tbody>
       </table>
-    <div class="p-2 small text-muted" id="tableInfo">총 0건</div>
+      
+      <div class="d-flex justify-content-center py-3" id="pager"></div>
+
+    <div class="p-2 small text-muted border-top" id="tableInfo">총 0건</div>
   </div>
 </div>
 {% endblock %}
