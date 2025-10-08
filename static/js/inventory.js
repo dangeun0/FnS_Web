@@ -186,8 +186,8 @@ Array.from(document.querySelectorAll('th.sortable')).forEach(th=>{
   });
 });
 
-const btnLogout = document.getElementById('btnLogout');
-if(btnLogout){ btnLogout.addEventListener('click', ()=>{ if(confirm('로그아웃 하시겠습니까?')) location.href='/logout'; }); }
+//const btnLogout = document.getElementById('btnLogout');
+//if(btnLogout){ btnLogout.addEventListener('click', ()=>{ if(confirm('로그아웃 하시겠습니까?')) location.href='/logout'; }); }
 
 const menuWrap = document.getElementById('colMenuWrap');
 document.getElementById('btnCols').addEventListener('click', ()=>{ menuWrap.classList.toggle('open'); });
