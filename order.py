@@ -3,15 +3,6 @@ from db import get_conn
 
 order_bp = Blueprint('order', __name__, url_prefix='/order')
 
-# [추가] 페이징 파라미터 처리를 위한 헬퍼 함수
-def _parse_int(v, default, lo, hi):
-    try:
-        x = int(v)
-        return max(lo, min(x, hi))
-    except (ValueError, TypeError):
-        return default
-
-
 # 발주 리스트 페이지
 defined_columns = [
     "MANAGE_NO", "ORDER_DATE", "PROGRESS_STATUS", "ORDER_KIND", "USAGE_LOCATION",
@@ -24,10 +15,6 @@ defined_columns = [
 @order_bp.route('/list')
 def order_list():
     return render_template('order/order_list.html')
-
-@order_bp.route('/detail/<manage_no>')
-def order_detail_page(manage_no):
-    return render_template('order/order_detail.html', manage_no=manage_no)
 
 # -------------------------------
 # 내부 유틸 (프런트 호환용 키 매핑)
