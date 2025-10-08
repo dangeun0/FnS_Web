@@ -1,7 +1,7 @@
 // ===== State & Helpers =====
-
 let state = { page:1, per_page:20, sort_col:'STOCK', sort_dir:'DESC', q:'' };
 const $ = (s)=>document.querySelector(s);
+const tbody = document.querySelector('#grid tbody');
 const spinner = document.getElementById('spinner');
 
 const COLUMNS = [
@@ -84,12 +84,6 @@ function buildPager(curr, total){
 
 // ===== Data Load =====
 async function load(){
-  const tbody = document.querySelector('#grid tbody');
-  if (!tbody) {
-    console.error("Critical error: #grid tbody element not found.");
-    return;
-  }
-
   showBusy(true);
   writeURL(true);
   const params = new URLSearchParams(state);
@@ -107,7 +101,7 @@ async function load(){
   (json.data||[]).forEach(r=>{
     const tr = document.createElement('tr');
     tr.className='clickable';
-    tr.dataset.code = r.item_code;
+    tr.dataset.code = r.item_code; // ✅ 행에서 품목코드 추적
     tr.innerHTML = `
       <td class="col-CATEGORY_NAME">${r.category_name||''}</td>
       <td class="col-MAKER_NAME">${r.maker_name||''}</td>
@@ -154,7 +148,7 @@ function renderDetail(d){
   addKV('제조사', d.maker_name);
   addKV('규격', d.item_spec);
   addKV('재질', d.material_name);
-  addKV('현재고', d.stock, 'dStock');
+  addKV('현재고', d.stock, 'dStock'); // ✅ 식별 가능한 현재고 DOM
   addKV('위치', d.item_location);
   if(d.item_note) addKV('비고', d.item_note);
 
@@ -215,18 +209,22 @@ document.getElementById('txnConfirm').addEventListener('click', async ()=>{
     const j = await res.json();
     if(!j.success){ alert(j.message || '처리 실패'); return; }
 
+    // 모달 현재고 반영
     const dStock = document.getElementById('dStock');
     if(dStock) dStock.textContent = j.new_stock;
 
+    // 리스트 행 현재고 즉시 반영
     const row = document.querySelector(`tr[data-code="${window.currentCode}"] td.col-STOCK`);
     if(row) row.textContent = j.new_stock;
 
+    // 이력 상단 추가
     const tr = document.createElement('tr');
     const _label = type==='IN' ? '입고' : '출고';
     const _cls = type==='IN' ? 'pill in' : 'pill out';
     tr.innerHTML = `<td>${new Date().toLocaleString()}</td><td><span class="${_cls}">${_label}</span></td><td style=\"text-align:right\">${qty}</td><td>${note||''}</td>`;
     document.getElementById('dHist').prepend(tr);
 
+    // 입력 초기화
     document.getElementById('txnQty').value='';
     document.getElementById('txnNote').value='';
   }catch(e){ alert('에러: '+e); }
