@@ -23,5 +23,17 @@ def home():
     # 로그인 성공 시 항상 재고 리스트 페이지로 이동
     return redirect(url_for("inventory.page"))
 
+@app.route("/routes")
+def list_routes():
+    import urllib
+    output = []
+    for rule in app.url_map.iter_rules():
+        methods = ','.join(rule.methods)
+        url = urllib.parse.unquote(rule.rule)
+        line = "{:50s} {:35s} {}".format(rule.endpoint, methods, url)
+        output.append(line)
+    response_body = "<pre>" + "\n".join(sorted(output)) + "</pre>"
+    return response_body
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
