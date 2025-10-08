@@ -1,17 +1,12 @@
 // [수정] static/js/order.js
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (document.getElementById("orderTableBody")) initOrderList();
-  if (document.getElementById("order-detail-root")) initOrderDetail();
-});
+// [추가] 페이징을 위한 상태 객체
+let state = { page: 1, per_page: 20 };
 
-// ===== State & Helper Functions (페이징을 위해 추가) =====
-let state = { page: 1, per_page: 20 }; // 기본 페이지 상태
-
+// [추가] 페이징을 위한 헬퍼 함수
 function readURL(){
   const p = new URLSearchParams(location.search);
   state.page = parseInt(p.get('page')) || 1;
-  state.per_page = parseInt(p.get('per_page')) || 20;
 }
 
 function writeURL(replace = true){
@@ -57,11 +52,30 @@ function buildPager(curr, total){
   addBtn('»', total, {disabled: curr === total});
 }
 
-// ===== 기존 Helper Functions =====
+// --- 원본 코드 시작 ---
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("orderTableBody")) {
+    // [수정] 페이지 로드 시 페이징 상태 읽고 데이터 로드
+    const app = initOrderList();
+    readURL();
+    app.loadOrders();
+    // [추가] 뒤로가기 버튼 처리
+    window.addEventListener('popstate', () => {
+        readURL();
+        app.loadOrders();
+    });
+  }
+  if (document.getElementById("order-detail-root")) {
+    initOrderDetail();
+  }
+});
+
 function toStatusClass(status) {
   if (!status) return "";
   const normalized = status.trim();
-  const map = { "완료": "납품" };
+  const map = {
+    "완료": "납품",
+  };
   const key = map[normalized] || normalized;
   return "status-" + key.replace(/\s+/g, "");
 }
@@ -75,34 +89,31 @@ function formatDate(dateStr) {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yy}-${mm}-${dd}`;
-  } catch(e) { return ''; }
+  } catch (e) { return ''; }
 }
 
-
-// =================== 발주 리스트 ===================
 function initOrderList() {
   const orderTableBody = document.getElementById("orderTableBody");
   const searchForm = document.getElementById("searchForm");
   const reloadBtn = document.getElementById("reloadBtn");
 
   async function loadOrders() {
-    writeURL(true);
+    writeURL(true); // [수정] URL 업데이트
     
+    // [수정] 검색 조건과 페이징 조건을 함께 보냄
     const params = new URLSearchParams(location.search);
-    // state의 per_page를 params에 추가
-    params.set('per_page', state.per_page);
 
     try {
       const res = await fetch(`/order/api/orders?${params.toString()}`);
-      const json = await res.json();
+      const json = await res.json(); // [수정] 백엔드 응답 구조 변경됨
       orderTableBody.innerHTML = "";
 
       if (json.data && json.data.length > 0) {
         json.data.forEach(row => {
           const tr = document.createElement("tr");
-          const statusKey = (row.progress_status || "").trim();
-          const statusHtml = `<div class="status-cell"><span class="status-dot ${toStatusClass(statusKey)}"></span><span>${statusKey}</span></div>`;
+          const statusHtml = `<div class="status-cell"><span class="status-dot ${toStatusClass(row.progress_status)}"></span><span>${row.progress_status || ''}</span></div>`;
 
+          // 원본 컬럼 순서 유지
           tr.innerHTML = `
             <td class="nowrap sticky-col" data-label="관리번호"><strong>${row.manage_no}</strong></td>
             <td class="nowrap" data-label="고객사">${row.order_vendor || ''}</td>
@@ -126,6 +137,7 @@ function initOrderList() {
         orderTableBody.innerHTML = `<tr><td colspan="14" class="text-center py-5">표시할 데이터가 없습니다.</td></tr>`;
       }
       
+      // [수정] 총 건수 및 페이저 생성
       document.getElementById("tableInfo").textContent = `총 ${json.total_count}건`;
       buildPager(json.page, json.total_pages);
 
@@ -146,40 +158,20 @@ function initOrderList() {
   if (reloadBtn) {
     reloadBtn.addEventListener("click", () => {
       if(searchForm) searchForm.reset();
-      state.page = 1;
-      // URL에서 검색 파라미터 제거
       const url = new URL(window.location);
-      url.searchParams.forEach((v, k) => {
-        if (k !== 'page' && k !== 'per_page') {
-            url.searchParams.delete(k);
-        }
+      url.searchParams.forEach((v,k) => {
+          if (k !== 'page' && k !== 'per_page') url.searchParams.delete(k);
       });
       history.pushState({}, '', url);
+      state.page = 1;
       loadOrders();
     });
   }
   
-  // Return a public API for the pager buttons
+  // 외부에서 loadOrders를 호출할 수 있도록 반환
   return { loadOrders };
 }
 
-// =================== 발주 상세 ===================
 async function initOrderDetail() {
-    // (기존 코드와 동일)
+    // (이 부분은 사용자님이 주신 원본 파일에 내용이 없었으므로 비워둡니다)
 }
-
-// ===== 최초 페이지 로드 및 뒤로가기 처리 =====
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById("orderTableBody")) {
-        const orderListApp = initOrderList();
-        readURL();
-        orderListApp.loadOrders();
-        window.addEventListener('popstate', () => {
-            readURL();
-            orderListApp.loadOrders();
-        });
-    }
-    if (document.getElementById("order-detail-root")) {
-        initOrderDetail();
-    }
-});

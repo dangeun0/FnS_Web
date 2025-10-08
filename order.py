@@ -1,4 +1,3 @@
-# [수정] order.py
 from flask import Blueprint, render_template, request, jsonify
 from db import get_conn
 import math
@@ -14,7 +13,7 @@ def _parse_int(v, default, lo, hi):
     except (ValueError, TypeError):
         return default
 
-# --- 페이지 렌더링 ---
+# --- 원본 코드 유지 ---
 @order_bp.route('/list')
 def order_list():
     return render_template('order/order_list.html')
@@ -23,7 +22,6 @@ def order_list():
 def order_detail_page(manage_no):
     return render_template('order/order_detail.html', manage_no=manage_no)
 
-# --- 내부 유틸 ---
 _def_dt = lambda v: (v.isoformat() if hasattr(v, 'isoformat') else v)
 
 def _map_summary_row(o: dict) -> dict:
@@ -53,37 +51,27 @@ def _map_summary_row(o: dict) -> dict:
         "remarks": o.get("remarks"),
     }
 
-def _map_detail_row(o: dict) -> dict:
-    # (상세 API는 기존과 동일)
-    pass
-
 # --- API ---
 @order_bp.route('/api/orders')
 def api_orders():
     """
-    [수정] 페이징, 정렬, 검색 기능이 가능하도록 구조 변경
+    [수정] 페이징 기능만 추가
     """
     try:
-        # 파라미터 파싱
         page = _parse_int(request.args.get('page', 1), 1, 1, 10**9)
         per_page = _parse_int(request.args.get('per_page', 20), 20, 1, 200)
         
-        # TODO: 향후 정렬, 검색 기능 추가 시 파라미터 추가
         offset = (page - 1) * per_page
         
         with get_conn() as conn:
             cur = conn.cursor()
             
-            # TODO: 향후 검색 조건(WHERE) 추가
             where_clause = ""
             binds = {}
 
-            # 전체 카운트 쿼리
             cur.execute(f"SELECT COUNT(*) FROM VW_ORDERS_SUMMARY {where_clause}", binds)
             total_count = cur.fetchone()[0]
 
-            # 데이터 페이징 쿼리
-            # TODO: 향후 정렬(ORDER BY) 기능 추가
             sql = f"""
                 SELECT * FROM VW_ORDERS_SUMMARY
                 {where_clause}
@@ -95,7 +83,6 @@ def api_orders():
             cols = [d[0].lower() for d in cur.description]
             rows = [dict(zip(cols, r)) for r in cur.fetchall()]
 
-        # inventory API와 동일한 응답 구조로 변경
         return jsonify({
             'data': [_map_summary_row(r) for r in rows],
             'total_count': total_count,
@@ -108,12 +95,13 @@ def api_orders():
         return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
 
+# --- 원본 코드 유지 ---
 @order_bp.route('/api/order/<manage_no>')
 def api_order_detail(manage_no):
-    # (기존 코드와 동일)
+    # (이 부분은 사용자님이 주신 원본 파일에 내용이 없었으므로 비워둡니다)
     pass
 
 @order_bp.route('/api/order_detail/<manage_no>')
 def api_order_detail_page(manage_no):
-    # (기존 코드와 동일)
+    # (이 부분은 사용자님이 주신 원본 파일에 내용이 없었으므로 비워둡니다)
     pass
